@@ -30,7 +30,7 @@ func (this *Application) AddFile(filename string) error {
 	var file *File = NewFile(filename)
 	this.Files = append(this.Files, file)
 	this.CurrentFile = file
-  log.Println("new file added: ", filename)
+	log.Println("new file added: ", filename)
 
 	return nil
 }
@@ -50,7 +50,7 @@ func (this *Application) OpenFile(filename string) error {
 // Close current file and replace it with the next file in buffer list.
 func (this *Application) CloseFile() {
 	if this.CurrentFile == nil || len(this.Files) == 0 {
-    log.Println("buffer list is empty")
+		log.Println("buffer list is empty")
 		return
 	}
 
@@ -73,10 +73,16 @@ func (this *Application) CloseFile() {
 			newFiles = append(newFiles, this.Files[:i]...)
 			newFiles = append(newFiles, this.Files[i+1:]...)
 
-      this.Files = newFiles
+			this.Files = newFiles
 			return
 		}
 	}
+}
+
+// Close all files
+func (this *Application) CloseAll() {
+  this.Files = make([]*File, 0)
+  this.CurrentFile = nil
 }
 
 // Open the next file in buffer list
@@ -102,7 +108,7 @@ func (this *Application) OpenNextFile() {
 		}
 	}
 
-  log.Println("No next file")
+	log.Println("No next file")
 }
 
 // Open the previous file in buffer list
@@ -128,5 +134,5 @@ func (this *Application) OpenPrevFile() {
 		}
 	}
 
-  log.Println("No prev file")
+	log.Println("No prev file")
 }
