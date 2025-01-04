@@ -5,11 +5,11 @@ import (
 	"go-editor/config"
 	"go-editor/internal"
 	"log"
-  "os"
+	"os"
 )
 
 func main() {
-  logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		panic(err)
 	}

@@ -22,8 +22,8 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 				lines = make([]*internal.Line, 0)
 			}
 		}
-		if len(lines) > config.EDITOR_BOX_HEIGHT {
-			lines = lines[:config.EDITOR_BOX_HEIGHT]
+		if len(lines) > config.MAX_DISPLAY_LINES {
+			lines = lines[:config.MAX_DISPLAY_LINES]
 		}
 
 		for _, line := range lines {
@@ -36,8 +36,8 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 				}
 			}
 
-			if len(text) > config.EDITOR_BOX_WIDTH {
-				text = text[:config.EDITOR_BOX_WIDTH]
+			if len(text) > config.MAX_DISPLAY_COLS {
+				text = text[:config.MAX_DISPLAY_COLS]
 			}
 
 			displayLines = append(displayLines, text)
@@ -60,7 +60,7 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 		s.ShowCursor(displayCursorX, displayCursorY)
 
 	} else {
-		s.ShowCursor(config.EDITOR_BOX_LEFT, config.EDITOR_BOX_HEIGHT)
+		s.ShowCursor(config.EDITOR_BOX_LEFT+1, config.EDITOR_BOX_HEIGHT+1)
 	}
 
 	s.Show()

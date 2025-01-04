@@ -97,9 +97,9 @@ func (this *File) GetCurrentLine() *Line {
 func (this *File) MoveDown() {
 	if this.CursorLine+1 < len(this.Lines) {
 		this.CursorLine += 1
-		if this.CursorLine-this.ScrollY >= config.EDITOR_BOX_HEIGHT {
+		if this.CursorLine-this.ScrollY >= config.MAX_DISPLAY_LINES {
 			log.Println("scrolling down")
-			this.ScrollY += this.CursorLine - config.EDITOR_BOX_HEIGHT
+			this.ScrollY += this.CursorLine - config.MAX_DISPLAY_LINES
 		}
 	}
 }
@@ -112,6 +112,22 @@ func (this *File) MoveUp() {
 			this.ScrollY = this.CursorLine
 		}
 	}
+}
+
+func (this *File) MoveForward() {
+  this.GetCurrentLine().MoveForward()
+  if this.GetCurrentLine().Cursor - this.ScrollX >= config.MAX_DISPLAY_COLS {
+    log.Println("scrolling right")
+    this.ScrollX += this.GetCurrentLine().Cursor - config.MAX_DISPLAY_COLS
+  }
+}
+
+func (this *File) MoveBackward() {
+  this.GetCurrentLine().MoveBackward()
+  if this.GetCurrentLine().Cursor-this.ScrollX < 0 {
+    log.Println("scrolling left")
+    this.ScrollX = this.GetCurrentLine().Cursor
+  }
 }
 
 // func (this *File) Paste(text string) {
