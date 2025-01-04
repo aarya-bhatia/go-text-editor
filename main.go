@@ -5,9 +5,19 @@ import (
 	"go-editor/config"
 	"go-editor/internal"
 	"log"
+  "os"
 )
 
 func main() {
+  logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+
+	// Redirect log output to the file
+	log.SetOutput(logFile)
+
 	var editor *internal.Application = internal.NewApplication()
 
 	if err := editor.OpenFile(config.DEFAULT_FILENAME); err != nil {
