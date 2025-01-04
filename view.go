@@ -3,6 +3,7 @@ package main
 import (
 	"go-editor/config"
 	"go-editor/internal"
+	"log"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -36,14 +37,18 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 				}
 			}
 
-			if len(text) > config.MAX_DISPLAY_COLS {
-				text = text[:config.MAX_DISPLAY_COLS]
-			}
+      blank_line := ""
+      for i := 0; i < config.MAX_DISPLAY_COLS; i++ {
+        blank_line += " "
+      }
+
+      text = text + blank_line // pad line with blank spaces
+      text = text[:config.MAX_DISPLAY_COLS]
 
 			displayLines = append(displayLines, text)
 		}
 
-		displayString := strings.Join(displayLines, "\n")
+		displayString := strings.Join(displayLines, "")
 
 		DrawBox(s, config.EDITOR_BOX_LEFT, config.EDITOR_BOX_TOP, config.EDITOR_BOX_LEFT+config.EDITOR_BOX_WIDTH,
 			config.EDITOR_BOX_TOP+config.EDITOR_BOX_HEIGHT, tcell.StyleDefault, displayString)
@@ -51,11 +56,21 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 		DrawBox(s, config.STATUS_BOX_LEFT, config.STATUS_BOX_TOP, config.STATUS_BOX_LEFT+config.STATUS_BOX_WIDTH,
 			config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, "Press CTRL+C to exit")
 
-		displayCursorX := config.EDITOR_BOX_LEFT + editor.CurrentFile.GetCurrentLine().Cursor + 1
-		displayCursorY := config.EDITOR_BOX_TOP + editor.CurrentFile.CursorLine + 1
+		displayCursorX := editor.CurrentFile.GetCurrentLine().Cursor - editor.CurrentFile.ScrollX
+		displayCursorY := editor.CurrentFile.CursorLine - editor.CurrentFile.ScrollY
 
-		displayCursorX -= editor.CurrentFile.ScrollX
-		displayCursorY -= editor.CurrentFile.ScrollY
+		if displayCursorY < 0 {
+			log.Print("WARN: cursor out of bounds")
+			displayCursorY = 0
+		}
+
+		if displayCursorX < 0 {
+			log.Print("WARN: cursor out of bounds")
+			displayCursorX = 0
+		}
+
+		displayCursorX += config.EDITOR_BOX_LEFT + 1
+		displayCursorY += config.EDITOR_BOX_TOP + 1
 
 		s.ShowCursor(displayCursorX, displayCursorY)
 

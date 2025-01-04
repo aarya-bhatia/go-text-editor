@@ -96,21 +96,29 @@ func (this *File) GetCurrentLine() *Line {
 
 func (this *File) MoveDown() {
 	if this.CursorLine+1 < len(this.Lines) {
+    prevCursorX := this.GetCurrentLine().Cursor
+
 		this.CursorLine += 1
 		if this.CursorLine-this.ScrollY >= config.MAX_DISPLAY_LINES {
 			log.Println("scrolling down")
-			this.ScrollY += this.CursorLine - config.MAX_DISPLAY_LINES
+      this.ScrollY = this.CursorLine - config.MAX_DISPLAY_LINES + 1
 		}
+
+    this.GetCurrentLine().Cursor = min(len(this.GetCurrentLine().Text)-1, prevCursorX)
 	}
 }
 
 func (this *File) MoveUp() {
 	if this.CursorLine > 0 {
+    prevCursorX := this.GetCurrentLine().Cursor
+
 		this.CursorLine -= 1
 		if this.CursorLine-this.ScrollY < 0 {
 			log.Println("scrolling up")
 			this.ScrollY = this.CursorLine
 		}
+
+    this.GetCurrentLine().Cursor = min(len(this.GetCurrentLine().Text)-1, prevCursorX)
 	}
 }
 
@@ -118,7 +126,7 @@ func (this *File) MoveForward() {
   this.GetCurrentLine().MoveForward()
   if this.GetCurrentLine().Cursor - this.ScrollX >= config.MAX_DISPLAY_COLS {
     log.Println("scrolling right")
-    this.ScrollX += this.GetCurrentLine().Cursor - config.MAX_DISPLAY_COLS
+    this.ScrollX = this.GetCurrentLine().Cursor - config.MAX_DISPLAY_COLS + 1
   }
 }
 

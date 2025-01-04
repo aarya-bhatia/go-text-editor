@@ -1,8 +1,6 @@
 package main
 
 import (
-	"unicode"
-
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -10,16 +8,8 @@ func DrawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string
 	row := y1
 	col := x1
 	for _, r := range []rune(text) {
-		if r == '\n' {
-			row++
-			col = x1
-		} else {
-			if unicode.IsSpace(r) {
-				r = ' '
-			}
-			s.SetContent(col, row, r, nil, style)
-			col++
-		}
+		s.SetContent(col, row, r, nil, style)
+		col++
 
 		if col >= x2 {
 			row++

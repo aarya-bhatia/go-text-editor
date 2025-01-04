@@ -28,6 +28,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+  log.Println("Total lines in file: ", len(editor.CurrentFile.Lines))
+
+  for i, line := range editor.CurrentFile.Lines {
+    log.Println(i, line.Text)
+  }
+
 	defer editor.CloseAll()
 
 	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
