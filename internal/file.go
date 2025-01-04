@@ -1,14 +1,19 @@
 package internal
 
+import (
+	"go-editor/config"
+	"log"
+)
+
 type File struct {
-	Lines    []*Line
-	Name     string
-	Modified bool
-	Readonly bool
+	Lines      []*Line
+	Name       string
+	Modified   bool
+	Readonly   bool
 	CursorLine int
 
-	ScrollX  int
-	ScrollY  int
+	ScrollX int
+	ScrollY int
 }
 
 func NewFile(filename string) *File {
@@ -77,6 +82,38 @@ func (this *File) InsertLineBelowCursor() {
 	this.Modified = true
 }
 
+func (this *File) DeleteLine() {
+	newLines := make([]*Line, 0)
+	newLines = append(newLines, this.Lines[:this.CursorLine]...)
+	newLines = append(newLines, this.Lines[this.CursorLine+1:]...)
+	this.Lines = newLines
+	this.Modified = true
+}
+
+func (this *File) GetCurrentLine() *Line {
+	return this.Lines[this.CursorLine]
+}
+
+func (this *File) MoveDown() {
+	if this.CursorLine+1 < len(this.Lines) {
+		this.CursorLine += 1
+		if this.CursorLine-this.ScrollY >= config.EDITOR_BOX_HEIGHT {
+			log.Println("scrolling down")
+			this.ScrollY += this.CursorLine - config.EDITOR_BOX_HEIGHT
+		}
+	}
+}
+
+func (this *File) MoveUp() {
+	if this.CursorLine > 0 {
+		this.CursorLine -= 1
+		if this.CursorLine-this.ScrollY < 0 {
+			log.Println("scrolling up")
+			this.ScrollY = this.CursorLine
+		}
+	}
+}
+
 // func (this *File) Paste(text string) {
 // 	if len(text) == 0 {
 // 		return
@@ -114,15 +151,3 @@ func (this *File) InsertLineBelowCursor() {
 
 // 	this.Lines = newLines
 // }
-
-func (this *File) DeleteLine() {
-	newLines := make([]*Line, 0)
-	newLines = append(newLines, this.Lines[:this.CursorLine]...)
-	newLines = append(newLines, this.Lines[this.CursorLine+1:]...)
-	this.Lines = newLines
-	this.Modified = true
-}
-
-func (this *File) GetCurrentLine() *Line {
-	return this.Lines[this.CursorLine]
-}
