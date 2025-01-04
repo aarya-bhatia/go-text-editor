@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/gdamore/tcell/v2"
 	"go-editor/config"
 	"go-editor/internal"
 	"log"
 	"os"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 func main() {
-	logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0400)
 	if err != nil {
 		panic(err)
 	}
@@ -28,11 +29,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-  log.Println("Total lines in file: ", len(editor.CurrentFile.Lines))
+	log.Println("Total lines in file: ", len(editor.CurrentFile.Lines))
 
-  for i, line := range editor.CurrentFile.Lines {
-    log.Println(i, line.Text)
-  }
+	for i, line := range editor.CurrentFile.Lines {
+		log.Println(i, line.Text)
+	}
 
 	defer editor.CloseAll()
 

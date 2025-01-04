@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const DEFAULT_FILE_PERMISSIONS os.FileMode = 0664
+const DEFAULT_FILE_PERMISSIONS os.FileMode = 0640
 
 func ReadFileUtil(filename string) ([]string, error) {
 	fptr, err := os.OpenFile(filename, os.O_CREATE|os.O_RDONLY, DEFAULT_FILE_PERMISSIONS)
