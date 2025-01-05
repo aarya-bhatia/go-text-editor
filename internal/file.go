@@ -104,7 +104,7 @@ func (this *File) MoveDown() {
       this.ScrollY = this.CursorLine - config.MAX_DISPLAY_LINES + 1
 		}
 
-    this.GetCurrentLine().Cursor = min(len(this.GetCurrentLine().Text)-1, prevCursorX)
+    this.GetCurrentLine().Cursor = max(0, min(len(this.GetCurrentLine().Text)-1, prevCursorX))
 	}
 }
 
@@ -118,7 +118,7 @@ func (this *File) MoveUp() {
 			this.ScrollY = this.CursorLine
 		}
 
-    this.GetCurrentLine().Cursor = min(len(this.GetCurrentLine().Text)-1, prevCursorX)
+    this.GetCurrentLine().Cursor = max(0, min(len(this.GetCurrentLine().Text)-1, prevCursorX))
 	}
 }
 
