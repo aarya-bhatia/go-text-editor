@@ -3,6 +3,7 @@ package main
 import (
 	"go-editor/internal"
 	"log"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -14,9 +15,9 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 	log.Println("Got key", event.Name())
 
 	if event.Key() == tcell.KeyCtrlC {
-    log.Println("Setting quit signal")
-    editor.QuitSignal = true
-    return
+		log.Println("Setting quit signal")
+		editor.QuitSignal = true
+		return
 	} else if event.Key() == tcell.KeyCtrlL {
 		screen.Sync()
 		return
@@ -52,12 +53,8 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 			log.Println("Enter pressed")
 			currentMode = internal.NORMAL_MODE
 			editor.StatusLine = ""
+			handleUserCommand(editor)
 
-      if userCommand == "q" || userCommand == "quit" || userCommand == "exit" {
-        log.Println("Setting quit signal")
-        editor.QuitSignal = true
-        return
-      }
 		} else if event.Rune() != 0 {
 			userCommand += string(event.Rune())
 			editor.StatusLine = ":" + userCommand
@@ -74,5 +71,22 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 			editor.CurrentFile.GetCurrentLine().Cursor,
 			editor.CurrentFile.ScrollX,
 			editor.CurrentFile.ScrollY)
+	}
+}
+
+func handleUserCommand(editor *internal.Application) {
+	if userCommand == "q" || userCommand == "quit" || userCommand == "exit" {
+		log.Println("Setting quit signal")
+		editor.QuitSignal = true
+		return
+	}
+
+	userNumber, err := strconv.Atoi(userCommand) // check if its a numeral
+	if err == nil {
+		if editor.CurrentFile != nil {
+      log.Println("Move to line ", userNumber)
+			editor.CurrentFile.MoveToLineNo(userNumber)
+      return
+		}
 	}
 }
