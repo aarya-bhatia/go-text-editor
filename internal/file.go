@@ -180,6 +180,11 @@ func (this *File) MoveToLineNo(lineNo int) {
 	}
 }
 
+func (this *File) InsertChar(char byte) {
+  this.GetCurrentLine().InsertChar(char)
+  this.AdjustXScrollOnMoveForward()
+}
+
 // func (this *File) Paste(text string) {
 // 	if len(text) == 0 {
 // 		return

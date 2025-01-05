@@ -11,6 +11,12 @@ import (
 var currentMode int = internal.NORMAL_MODE
 var userCommand string = ""
 
+func changeMode(newMode int, editor *internal.Application) {
+	log.Println("changing mode to ", newMode)
+	currentMode = newMode
+	editor.StatusLine = ""
+}
+
 func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen tcell.Screen) {
 	log.Println("Got key", event.Name())
 
@@ -64,19 +70,18 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) 
 			editor.CurrentFile.MoveUp()
 		}
 	case ':':
-		currentMode = internal.COMMAND_MODE
+    changeMode(internal.COMMAND_MODE, editor)
 		editor.StatusLine = ":"
 		userCommand = ""
+  case 'i':
+    changeMode(internal.INSERT_MODE, editor)
 	}
 }
 
 func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application) {
 	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
-		log.Println("Enter pressed")
-		currentMode = internal.NORMAL_MODE
-		editor.StatusLine = ""
+		changeMode(internal.NORMAL_MODE, editor)
 		handleUserCommand(editor)
-
 	} else if event.Rune() != 0 {
 		userCommand += string(event.Rune())
 		editor.StatusLine = ":" + userCommand
@@ -84,6 +89,14 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application)
 }
 
 func handleKeyInInsertMode(event *tcell.EventKey, editor *internal.Application) {
+	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
+		changeMode(internal.NORMAL_MODE, editor)
+		handleUserCommand(editor)
+	} else if event.Rune() != 0 {
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.InsertChar(byte(event.Rune())) // TODO: add support for runes
+		}
+	}
 }
 
 func handleUserCommand(editor *internal.Application) {
