@@ -54,7 +54,7 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 			config.EDITOR_BOX_TOP+config.EDITOR_BOX_HEIGHT, tcell.StyleDefault, displayString)
 
 		DrawBox(s, config.STATUS_BOX_LEFT, config.STATUS_BOX_TOP, config.STATUS_BOX_LEFT+config.STATUS_BOX_WIDTH,
-			config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, "Press CTRL+C to exit")
+			config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, editor.StatusLine)
 
 		displayCursorX := editor.CurrentFile.GetCurrentLine().Cursor - editor.CurrentFile.ScrollX
 		displayCursorY := editor.CurrentFile.CursorLine - editor.CurrentFile.ScrollY

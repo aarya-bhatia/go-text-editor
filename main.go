@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0400)
+	logFile, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
 	if err != nil {
 		panic(err)
 	}
@@ -36,6 +36,8 @@ func main() {
 	}
 
 	defer editor.CloseAll()
+
+	editor.StatusLine = "Press CTRL+C to exit"
 
 	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 
@@ -64,7 +66,7 @@ func main() {
 	defer quit()
 
 	// Event loop
-	for {
+	for editor.QuitSignal == false {
 		// Update screen
 		refreshScreen(s, editor)
 
@@ -76,13 +78,7 @@ func main() {
 		case *tcell.EventResize:
 			s.Sync()
 		case *tcell.EventKey:
-			if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
-				return
-			} else if ev.Key() == tcell.KeyCtrlL {
-				s.Sync()
-			} else {
-				handleKey(ev.Rune(), editor)
-			}
+			handleKeyEvent(ev, editor, s)
 		case *tcell.EventMouse:
 			log.Println("Mouse is not supported")
 		}
