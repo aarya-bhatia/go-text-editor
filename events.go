@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+var currentMode int = internal.NORMAL_MODE
+
 func handleKey(key rune, editor *internal.Application) {
 	log.Println("Got key", key)
 
