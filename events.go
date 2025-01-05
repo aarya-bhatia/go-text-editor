@@ -8,12 +8,11 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-var currentMode int = internal.NORMAL_MODE
 var userCommand string = ""
 
 func changeMode(newMode int, editor *internal.Application) {
 	log.Println("changing mode to ", newMode)
-	currentMode = newMode
+	editor.Mode = newMode
 	editor.StatusLine = ""
 }
 
@@ -31,7 +30,7 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 		return
 	}
 
-	switch currentMode {
+	switch editor.Mode {
 	case internal.NORMAL_MODE:
 		handleKeyInNormalMode(event, editor)
 

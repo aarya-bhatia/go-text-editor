@@ -1,5 +1,7 @@
 package config
 
+const DEBUG=false
+
 const DEFAULT_FILENAME = "go.mod"
 
 const EDITOR_BOX_TOP = 2

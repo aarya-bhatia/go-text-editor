@@ -31,8 +31,10 @@ func main() {
 
 	log.Println("Total lines in file: ", len(editor.CurrentFile.Lines))
 
-	for i, line := range editor.CurrentFile.Lines {
-		log.Println(i, line.Text)
+	if config.DEBUG {
+		for i, line := range editor.CurrentFile.Lines {
+			log.Println(i, line.Text)
+		}
 	}
 
 	defer editor.CloseAll()

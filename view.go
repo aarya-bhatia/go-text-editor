@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go-editor/config"
 	"go-editor/internal"
 	"log"
@@ -8,6 +9,19 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 )
+
+func getModeName(mode int) string {
+	switch mode {
+	case internal.NORMAL_MODE:
+		return "NORMAL"
+	case internal.COMMAND_MODE:
+		return "COMMAND"
+	case internal.INSERT_MODE:
+		return "INSERT"
+	}
+
+	return ""
+}
 
 func refreshScreen(s tcell.Screen, editor *internal.Application) {
 	s.Clear()
@@ -37,13 +51,13 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 				}
 			}
 
-      blank_line := ""
-      for i := 0; i < config.MAX_DISPLAY_COLS; i++ {
-        blank_line += " "
-      }
+			blank_line := ""
+			for i := 0; i < config.MAX_DISPLAY_COLS; i++ {
+				blank_line += " "
+			}
 
-      text = text + blank_line // pad line with blank spaces
-      text = text[:config.MAX_DISPLAY_COLS]
+			text = text + blank_line // pad line with blank spaces
+			text = text[:config.MAX_DISPLAY_COLS]
 
 			displayLines = append(displayLines, text)
 		}
@@ -54,7 +68,7 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 			config.EDITOR_BOX_TOP+config.EDITOR_BOX_HEIGHT, tcell.StyleDefault, displayString)
 
 		DrawBox(s, config.STATUS_BOX_LEFT, config.STATUS_BOX_TOP, config.STATUS_BOX_LEFT+config.STATUS_BOX_WIDTH,
-			config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, editor.StatusLine)
+    config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, fmt.Sprintf("[%s] %s", getModeName(editor.Mode), editor.StatusLine))
 
 		displayCursorX := editor.CurrentFile.GetCurrentLine().Cursor - editor.CurrentFile.ScrollX
 		displayCursorY := editor.CurrentFile.CursorLine - editor.CurrentFile.ScrollY
