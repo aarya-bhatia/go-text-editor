@@ -98,7 +98,7 @@ func (this *File) MoveDown() {
 	if this.CursorLine+1 >= len(this.Lines) {
 		return
 	}
-	prevCursorX := this.GetCurrentLine().Cursor
+	prevCursorX := this.GetXCursor()
 	this.CursorLine += 1
 	this.AdjustYScrollOnMoveDown()
 	this.AdjustXCursorOnVerticalMovement(prevCursorX)
@@ -108,7 +108,7 @@ func (this *File) MoveUp() {
 	if this.CursorLine-1 < 0 {
 		return
 	}
-	prevCursorX := this.GetCurrentLine().Cursor
+	prevCursorX := this.GetXCursor()
 	this.CursorLine -= 1
 	this.AdjustYScrollOnMoveUp()
 	this.AdjustXCursorOnVerticalMovement(prevCursorX)
@@ -125,7 +125,7 @@ func (this *File) MoveBackward() {
 }
 
 func (this *File) AdjustXCursorOnVerticalMovement(prevCursorX int) {
-	this.GetCurrentLine().Cursor = max(0, min(len(this.GetCurrentLine().Text)-1, prevCursorX))
+	this.SetXCursor(max(0, min(len(this.GetCurrentLine().Text)-1, prevCursorX)))
 }
 
 func (this *File) AdjustYScrollOnMoveUp() {
@@ -143,16 +143,16 @@ func (this *File) AdjustYScrollOnMoveDown() {
 }
 
 func (this *File) AdjustXScrollOnMoveForward() {
-	if this.GetCurrentLine().Cursor-this.ScrollX >= config.MAX_DISPLAY_COLS {
+  if this.GetXCursor()-this.ScrollX >= config.MAX_DISPLAY_COLS {
 		log.Println("scrolling right")
-		this.ScrollX = this.GetCurrentLine().Cursor - config.MAX_DISPLAY_COLS + 1
+		this.ScrollX = this.GetXCursor() - config.MAX_DISPLAY_COLS + 1
 	}
 }
 
 func (this *File) AdjustXScrollOnMoveBackward() {
-	if this.GetCurrentLine().Cursor-this.ScrollX < 0 {
+	if this.GetXCursor()-this.ScrollX < 0 {
 		log.Println("scrolling left")
-		this.ScrollX = this.GetCurrentLine().Cursor
+		this.ScrollX = this.GetXCursor()
 	}
 }
 
@@ -169,12 +169,12 @@ func (this *File) MoveToLineNo(lineNo int) {
 
 	if lineNo < this.CursorLine { // up scroll
 		this.CursorLine = lineNo
-		prevCursorX := this.GetCurrentLine().Cursor
+		prevCursorX := this.GetXCursor()
 		this.AdjustYScrollOnMoveUp()
 		this.AdjustXCursorOnVerticalMovement(prevCursorX)
 	} else { // down scroll
 		this.CursorLine = lineNo
-		prevCursorX := this.GetCurrentLine().Cursor
+		prevCursorX := this.GetXCursor()
 		this.AdjustYScrollOnMoveDown()
 		this.AdjustXCursorOnVerticalMovement(prevCursorX)
 	}
@@ -183,6 +183,14 @@ func (this *File) MoveToLineNo(lineNo int) {
 func (this *File) InsertChar(char byte) {
   this.GetCurrentLine().InsertChar(char)
   this.AdjustXScrollOnMoveForward()
+}
+
+func (this *File) GetXCursor() int {
+  return this.GetCurrentLine().Cursor
+}
+
+func (this *File) SetXCursor(value int) {
+  this.GetCurrentLine().Cursor = value
 }
 
 // func (this *File) Paste(text string) {
