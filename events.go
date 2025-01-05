@@ -18,51 +18,22 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 		log.Println("Setting quit signal")
 		editor.QuitSignal = true
 		return
-	} else if event.Key() == tcell.KeyCtrlL {
+	}
+
+	if event.Key() == tcell.KeyCtrlL {
 		screen.Sync()
 		return
 	}
 
 	switch currentMode {
 	case internal.NORMAL_MODE:
-		switch event.Rune() {
-		case 'h':
-			if editor.CurrentFile != nil {
-				editor.CurrentFile.MoveBackward()
-			}
-		case 'l':
-			if editor.CurrentFile != nil {
-				editor.CurrentFile.MoveForward()
-			}
-		case 'j':
-			if editor.CurrentFile != nil {
-				editor.CurrentFile.MoveDown()
-			}
-		case 'k':
-			if editor.CurrentFile != nil {
-				editor.CurrentFile.MoveUp()
-			}
-		case ':':
-			currentMode = internal.COMMAND_MODE
-			editor.StatusLine = ":"
-			userCommand = ""
-		}
+		handleKeyInNormalMode(event, editor)
 
 	case internal.COMMAND_MODE:
-		if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
-			log.Println("Enter pressed")
-			currentMode = internal.NORMAL_MODE
-			editor.StatusLine = ""
-			handleUserCommand(editor)
-
-		} else if event.Rune() != 0 {
-			userCommand += string(event.Rune())
-			editor.StatusLine = ":" + userCommand
-		}
+		handleKeyInCommandMode(event, editor)
 
 	case internal.INSERT_MODE:
-		switch event.Rune() {
-		}
+		handleKeyInInsertMode(event, editor)
 	}
 
 	if editor.CurrentFile != nil {
@@ -72,6 +43,47 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 			editor.CurrentFile.ScrollX,
 			editor.CurrentFile.ScrollY)
 	}
+}
+
+func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) {
+	switch event.Rune() {
+	case 'h':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.MoveBackward()
+		}
+	case 'l':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.MoveForward()
+		}
+	case 'j':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.MoveDown()
+		}
+	case 'k':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.MoveUp()
+		}
+	case ':':
+		currentMode = internal.COMMAND_MODE
+		editor.StatusLine = ":"
+		userCommand = ""
+	}
+}
+
+func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application) {
+	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
+		log.Println("Enter pressed")
+		currentMode = internal.NORMAL_MODE
+		editor.StatusLine = ""
+		handleUserCommand(editor)
+
+	} else if event.Rune() != 0 {
+		userCommand += string(event.Rune())
+		editor.StatusLine = ":" + userCommand
+	}
+}
+
+func handleKeyInInsertMode(event *tcell.EventKey, editor *internal.Application) {
 }
 
 func handleUserCommand(editor *internal.Application) {
@@ -84,9 +96,9 @@ func handleUserCommand(editor *internal.Application) {
 	userNumber, err := strconv.Atoi(userCommand) // check if its a numeral
 	if err == nil {
 		if editor.CurrentFile != nil {
-      log.Println("Move to line ", userNumber)
+			log.Println("Move to line ", userNumber)
 			editor.CurrentFile.MoveToLineNo(userNumber)
-      return
+			return
 		}
 	}
 }
