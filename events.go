@@ -52,6 +52,16 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 
 func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) {
 	switch event.Rune() {
+		case '0':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.SetXCursor(0)
+		}
+
+		case '$':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.GetCurrentLine().MoveToEnd()
+			editor.CurrentFile.AdjustXScrollOnMoveForward()
+		}
 	case 'h':
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.MoveBackward()
