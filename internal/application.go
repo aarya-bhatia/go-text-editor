@@ -5,6 +5,8 @@ import "log"
 const NORMAL_MODE int = 0
 const INSERT_MODE int = 1
 const COMMAND_MODE int = 2
+const NORMAL_MODE_ARG_PENDING = 3 
+
 
 type Application struct {
 	QuitSignal  bool

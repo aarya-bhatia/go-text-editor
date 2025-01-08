@@ -18,9 +18,9 @@ func getModeName(mode int) string {
 		return "COMMAND"
 	case internal.INSERT_MODE:
 		return "INSERT"
-	}
-
-	return ""
+  default:
+    return "UNNAMED"
+  }
 }
 
 func refreshScreen(s tcell.Screen, editor *internal.Application) {

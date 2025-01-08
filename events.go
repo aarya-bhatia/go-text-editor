@@ -10,12 +10,6 @@ import (
 
 var userCommand string = ""
 
-func changeMode(newMode int, editor *internal.Application) {
-	log.Println("changing mode to ", newMode)
-	editor.Mode = newMode
-	editor.StatusLine = ""
-}
-
 func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen tcell.Screen) {
 	log.Println("Got key", event.Name())
 
@@ -39,6 +33,9 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 
 	case internal.INSERT_MODE:
 		handleKeyInInsertMode(event, editor)
+
+	case internal.NORMAL_MODE_ARG_PENDING:
+		handleKeyInNormalModeArgPending(event, editor)
 	}
 
 	if editor.CurrentFile != nil {
@@ -50,14 +47,21 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 	}
 }
 
+func handleKeyInNormalModeArgPending(event *tcell.EventKey, editor *internal.Application) {
+	editor.Mode = internal.NORMAL_MODE
+	if event.Rune() != 0 {
+		// editor.CurrentFile.FindChar(event.Rune())
+	}
+}
+
 func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) {
 	switch event.Rune() {
-		case '0':
+	case '0':
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.SetXCursor(0)
 		}
 
-		case '$':
+	case '$':
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.GetCurrentLine().MoveToEnd()
 			editor.CurrentFile.AdjustXScrollOnMoveForward()
@@ -79,17 +83,22 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) 
 			editor.CurrentFile.MoveUp()
 		}
 	case ':':
-    changeMode(internal.COMMAND_MODE, editor)
+		editor.Mode = internal.COMMAND_MODE
 		editor.StatusLine = ":"
 		userCommand = ""
-  case 'i':
-    changeMode(internal.INSERT_MODE, editor)
+	case 'i':
+		editor.Mode = internal.INSERT_MODE
+		editor.StatusLine = ""
+	case 'f':
+		if editor.CurrentFile != nil {
+			editor.Mode = internal.NORMAL_MODE_ARG_PENDING
+		}
 	}
 }
 
 func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application) {
 	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
-		changeMode(internal.NORMAL_MODE, editor)
+		editor.Mode = internal.NORMAL_MODE
 		handleUserCommand(editor)
 	} else if event.Rune() != 0 {
 		userCommand += string(event.Rune())
@@ -99,7 +108,7 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application)
 
 func handleKeyInInsertMode(event *tcell.EventKey, editor *internal.Application) {
 	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
-		changeMode(internal.NORMAL_MODE, editor)
+		editor.Mode = internal.NORMAL_MODE
 		handleUserCommand(editor)
 	} else if event.Rune() != 0 {
 		if editor.CurrentFile != nil {
