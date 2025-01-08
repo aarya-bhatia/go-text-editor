@@ -109,7 +109,7 @@ func handleUserCommand(editor *internal.Application) {
 	if err == nil {
 		if editor.CurrentFile != nil {
 			log.Println("Move to line ", userNumber)
-			editor.CurrentFile.MoveToLineNo(userNumber)
+			editor.CurrentFile.SetYCursor(userNumber)
 			return
 		}
 	}
