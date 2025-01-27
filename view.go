@@ -29,6 +29,8 @@ func refreshScreen(s tcell.Screen, editor *internal.Application) {
 	displayLines := make([]string, 0)
 
 	if editor.CurrentFile != nil {
+    editor.CurrentFile.AdjustScroll()
+
 		lines := editor.CurrentFile.Lines
 		if editor.CurrentFile.ScrollY > 0 {
 			if len(lines) > editor.CurrentFile.ScrollY {

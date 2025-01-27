@@ -64,7 +64,6 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) 
 	case '$':
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.GetCurrentLine().MoveToEnd()
-			editor.CurrentFile.AdjustXScrollOnMoveForward()
 		}
 	case 'h':
 		if editor.CurrentFile != nil {
@@ -84,7 +83,7 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) 
 		}
 	case ':':
 		editor.Mode = internal.COMMAND_MODE
-		editor.StatusLine = ":"
+		editor.StatusLine = ""
 		userCommand = ""
 	case 'i':
 		editor.Mode = internal.INSERT_MODE
@@ -102,7 +101,7 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application)
 		handleUserCommand(editor)
 	} else if event.Rune() != 0 {
 		userCommand += string(event.Rune())
-		editor.StatusLine = ":" + userCommand
+		editor.StatusLine = userCommand
 	}
 }
 

@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"log"
 	"strings"
 )
 
@@ -16,6 +17,19 @@ func NewLine() *Line {
 
 func NewLine1(text string) *Line {
 	return &Line{Text: text, Cursor: 0, Modified: false}
+}
+
+func (this *Line) Size() int {
+	return len(this.Text)
+}
+
+func (this *Line) SetCursor(cursor int) {
+  log.Printf("setting cursor column to %d", cursor)
+  if(cursor < 0 || cursor >= len(this.Text)) {
+    return
+  }
+
+  this.Cursor = cursor
 }
 
 // Clear all characters from line
