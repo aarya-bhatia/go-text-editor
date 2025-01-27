@@ -1,7 +1,6 @@
-package main
+package internal
 
 import (
-	"go-editor/internal"
 	"log"
 	"strconv"
 
@@ -10,7 +9,7 @@ import (
 
 var userCommand string = ""
 
-func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen tcell.Screen) {
+func handleKeyEvent(event *tcell.EventKey, editor *Application, screen tcell.Screen) {
 	log.Println("Got key", event.Name())
 
 	if event.Key() == tcell.KeyCtrlC {
@@ -25,16 +24,16 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 	}
 
 	switch editor.Mode {
-	case internal.NORMAL_MODE:
+	case NORMAL_MODE:
 		handleKeyInNormalMode(event, editor)
 
-	case internal.COMMAND_MODE:
+	case COMMAND_MODE:
 		handleKeyInCommandMode(event, editor)
 
-	case internal.INSERT_MODE:
+	case INSERT_MODE:
 		handleKeyInInsertMode(event, editor)
 
-	case internal.NORMAL_MODE_ARG_PENDING:
+	case NORMAL_MODE_ARG_PENDING:
 		handleKeyInNormalModeArgPending(event, editor)
 	}
 
@@ -47,14 +46,14 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 	}
 }
 
-func handleKeyInNormalModeArgPending(event *tcell.EventKey, editor *internal.Application) {
-	editor.Mode = internal.NORMAL_MODE
+func handleKeyInNormalModeArgPending(event *tcell.EventKey, editor *Application) {
+	editor.Mode = NORMAL_MODE
 	if event.Rune() != 0 {
 		editor.CurrentFile.JumpToNextChar(event.Rune())
 	}
 }
 
-func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) {
+func handleKeyInNormalMode(event *tcell.EventKey, editor *Application) {
 	switch event.Rune() {
 	case '0':
 		if editor.CurrentFile != nil {
@@ -82,22 +81,22 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *internal.Application) 
 			editor.CurrentFile.MoveUp()
 		}
 	case ':':
-		editor.Mode = internal.COMMAND_MODE
+		editor.Mode = COMMAND_MODE
 		editor.StatusLine = ""
 		userCommand = ""
 	case 'i':
-		editor.Mode = internal.INSERT_MODE
+		editor.Mode = INSERT_MODE
 		editor.StatusLine = ""
 	case 'f':
 		if editor.CurrentFile != nil {
-			editor.Mode = internal.NORMAL_MODE_ARG_PENDING
+			editor.Mode = NORMAL_MODE_ARG_PENDING
 		}
 	}
 }
 
-func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application) {
+func handleKeyInCommandMode(event *tcell.EventKey, editor *Application) {
 	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
-		editor.Mode = internal.NORMAL_MODE
+		editor.Mode = NORMAL_MODE
 		handleUserCommand(editor)
 	} else if event.Key() == tcell.KeyBS || event.Key() == tcell.KeyBackspace2 {
     userCommand = userCommand[:len(userCommand)-1]
@@ -108,9 +107,9 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application)
 	}
 }
 
-func handleKeyInInsertMode(event *tcell.EventKey, editor *internal.Application) {
+func handleKeyInInsertMode(event *tcell.EventKey, editor *Application) {
 	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
-		editor.Mode = internal.NORMAL_MODE
+		editor.Mode = NORMAL_MODE
 		handleUserCommand(editor)
 	} else if event.Rune() != 0 {
 		if editor.CurrentFile != nil {
@@ -119,7 +118,7 @@ func handleKeyInInsertMode(event *tcell.EventKey, editor *internal.Application) 
 	}
 }
 
-func handleUserCommand(editor *internal.Application) {
+func handleUserCommand(editor *Application) {
 	if userCommand == "q" || userCommand == "quit" || userCommand == "exit" {
 		log.Println("Setting quit signal")
 		editor.QuitSignal = true

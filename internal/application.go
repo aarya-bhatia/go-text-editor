@@ -5,8 +5,7 @@ import "log"
 const NORMAL_MODE int = 0
 const INSERT_MODE int = 1
 const COMMAND_MODE int = 2
-const NORMAL_MODE_ARG_PENDING = 3 
-
+const NORMAL_MODE_ARG_PENDING = 3
 
 type Application struct {
 	QuitSignal  bool
@@ -22,7 +21,7 @@ func NewApplication() *Application {
 	this.QuitSignal = false
 	this.Files = make([]*File, 0)
 	this.CurrentFile = nil
-	this.StatusLine = ""
+	this.StatusLine = "Press CTRL+C to exit"
 	this.Mode = NORMAL_MODE
 	return this
 }
@@ -83,8 +82,8 @@ func (this *Application) CloseFile() {
 
 // Close all files
 func (this *Application) CloseAll() {
-  this.Files = make([]*File, 0)
-  this.CurrentFile = nil
+	this.Files = make([]*File, 0)
+	this.CurrentFile = nil
 }
 
 // Open the next file in buffer list
@@ -137,4 +136,22 @@ func (this *Application) OpenPrevFile() {
 	}
 
 	log.Println("No prev file")
+}
+
+func (this *Application) OpenAll(filenames []string) {
+	for _, filename := range filenames {
+		file := NewFile(filename)
+
+		if err := file.ReadFile(); err != nil {
+			log.Println("WARN: Failed to open file:", filename)
+			continue
+		}
+
+		log.Printf("Opened file '%s' with %d lines.", filename, file.CountLines())
+		this.Files = append(this.Files, file)
+	}
+
+	if len(this.Files) > 0 {
+		this.CurrentFile = this.Files[0]
+	}
 }

@@ -1,12 +1,9 @@
 package main
 
 import (
-	"go-editor/config"
 	"go-editor/internal"
 	"log"
 	"os"
-
-	"github.com/gdamore/tcell/v2"
 )
 
 func main() {
@@ -19,70 +16,8 @@ func main() {
 	// Redirect log output to the file
 	log.SetOutput(logFile)
 
-	var editor *internal.Application = internal.NewApplication()
+  filenames := os.Args[1:]
 
-	if err := editor.OpenFile(config.DEFAULT_FILENAME); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := editor.CurrentFile.ReadFile(); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("Total lines in file: ", len(editor.CurrentFile.Lines))
-
-	if config.DEBUG {
-		for i, line := range editor.CurrentFile.Lines {
-			log.Println(i, line.Text)
-		}
-	}
-
-	defer editor.CloseAll()
-
-	editor.StatusLine = "Press CTRL+C to exit"
-
-	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-
-	// Initialize screen
-	s, err := tcell.NewScreen()
-	if err != nil {
-		log.Fatalf("%+v", err)
-	}
-	if err := s.Init(); err != nil {
-		log.Fatalf("%+v", err)
-	}
-	s.SetStyle(defStyle)
-	s.Clear()
-
-	quit := func() {
-		// You have to catch panics in a defer, clean up, and
-		// re-raise them - otherwise your application can
-		// die without leaving any diagnostic trace.
-		maybePanic := recover()
-		s.Fini()
-		if maybePanic != nil {
-			panic(maybePanic)
-		}
-	}
-
-	defer quit()
-
-	// Event loop
-	for editor.QuitSignal == false {
-		// Update screen
-		refreshScreen(s, editor)
-
-		// Poll event
-		ev := s.PollEvent()
-
-		// Process event
-		switch ev := ev.(type) {
-		case *tcell.EventResize:
-			s.Sync()
-		case *tcell.EventKey:
-			handleKeyEvent(ev, editor, s)
-		case *tcell.EventMouse:
-			log.Println("Mouse is not supported")
-		}
-	}
+  // Run application
+	internal.Start(filenames)
 }

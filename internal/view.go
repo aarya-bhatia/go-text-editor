@@ -1,28 +1,54 @@
-package main
+package internal
 
 import (
 	"fmt"
 	"go-editor/config"
-	"go-editor/internal"
 	"log"
 
 	"github.com/gdamore/tcell/v2"
 )
 
+func NewScreen() (tcell.Screen, func()) {
+	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
+
+	s, err := tcell.NewScreen()
+	if err != nil {
+		log.Fatalf("%+v", err)
+	}
+	if err := s.Init(); err != nil {
+		log.Fatalf("%+v", err)
+	}
+	s.SetStyle(defStyle)
+	s.Clear()
+
+  quit := func() {
+		// You have to catch panics in a defer, clean up, and
+		// re-raise them - otherwise your application can
+		// die without leaving any diagnostic trace.
+		maybePanic := recover()
+		s.Fini()
+		if maybePanic != nil {
+			panic(maybePanic)
+		}
+	}
+
+	return s, quit
+}
+
 func getModeName(mode int) string {
 	switch mode {
-	case internal.NORMAL_MODE:
+	case NORMAL_MODE:
 		return "NORMAL"
-	case internal.COMMAND_MODE:
+	case COMMAND_MODE:
 		return "COMMAND"
-	case internal.INSERT_MODE:
+	case INSERT_MODE:
 		return "INSERT"
 	default:
 		return "UNNAMED"
 	}
 }
 
-func getVisibleText(file *internal.File) [][]rune {
+func getVisibleText(file *File) [][]rune {
 	displayLines := make([][]rune, 0)
 
 	lines := file.Lines
@@ -31,7 +57,7 @@ func getVisibleText(file *internal.File) [][]rune {
 		if len(lines) > file.ScrollY {
 			lines = lines[file.ScrollY:]
 		} else {
-			lines = make([]*internal.Line, 0)
+			lines = make([]*Line, 0)
 		}
 	}
 	if len(lines) > config.MAX_DISPLAY_LINES {
@@ -62,7 +88,7 @@ func getVisibleText(file *internal.File) [][]rune {
 	return displayLines
 }
 
-func getDisplayCursor(file *internal.File) (int, int) {
+func getDisplayCursor(file *File) (int, int) {
 	displayCursorX := file.GetCurrentLine().Cursor - file.ScrollX
 	displayCursorY := file.CursorLine - file.ScrollY
 
@@ -82,16 +108,16 @@ func getDisplayCursor(file *internal.File) (int, int) {
 	return displayCursorX, displayCursorY
 }
 
-func displayFile(s tcell.Screen, file *internal.File) {
+func displayFile(s tcell.Screen, file *File) {
 
 	displayLines := getVisibleText(file)
-	displayString := internal.FlattenList(displayLines)
+	displayString := FlattenList(displayLines)
 
 	DrawBox(s, config.EDITOR_BOX_LEFT, config.EDITOR_BOX_TOP, config.EDITOR_BOX_LEFT+config.EDITOR_BOX_WIDTH,
 		config.EDITOR_BOX_TOP+config.EDITOR_BOX_HEIGHT, tcell.StyleDefault, displayString)
 }
 
-func refreshScreen(s tcell.Screen, editor *internal.Application) {
+func refreshScreen(s tcell.Screen, editor *Application) {
 	s.Clear()
 
 	if editor.CurrentFile != nil {
