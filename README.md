@@ -7,6 +7,8 @@ In progress.
 - insert mode
 - command mode
 - normal mode
-- auto-adjust scroll 
+- utf8 text
+- cursor
+- scroll 
 
 ## Help
