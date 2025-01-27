@@ -114,7 +114,7 @@ func handleKeyInInsertMode(event *tcell.EventKey, editor *internal.Application) 
 		handleUserCommand(editor)
 	} else if event.Rune() != 0 {
 		if editor.CurrentFile != nil {
-			editor.CurrentFile.InsertChar(byte(event.Rune())) // TODO: add support for runes
+			editor.CurrentFile.Insert(event.Rune())
 		}
 	}
 }

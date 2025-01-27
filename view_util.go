@@ -4,7 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-func DrawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
+func DrawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text []rune) {
 	row := y1
 	col := x1
 	for _, r := range text {
@@ -21,7 +21,7 @@ func DrawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string
 	}
 }
 
-func DrawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string) {
+func DrawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text []rune) {
 	if y2 < y1 {
 		y1, y2 = y2, y1
 	}

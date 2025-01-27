@@ -71,7 +71,7 @@ func (this *File) WriteFile() error {
 
 	raw_lines := make([]string, 0)
 	for _, line := range this.Lines {
-		raw_lines = append(raw_lines, line.Text)
+		raw_lines = append(raw_lines, string(line.Text))
 	}
 
 	err := WriteFileUtil(this.Name, raw_lines)
@@ -140,8 +140,8 @@ func (this *File) MoveBackward() {
 	this.GetCurrentLine().MoveBackward()
 }
 
-func (this *File) InsertChar(char byte) {
-	this.GetCurrentLine().InsertChar(char)
+func (this *File) Insert(r rune) {
+	this.GetCurrentLine().Insert(r)
 }
 
 func (this *File) GetXCursor() int {

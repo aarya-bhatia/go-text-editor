@@ -6,17 +6,17 @@ import (
 )
 
 type Line struct {
-	Text     string
+	Text     []rune
 	Cursor   int
 	Modified bool
 }
 
 func NewLine() *Line {
-	return &Line{Text: "", Cursor: 0, Modified: false}
+	return &Line{Text: []rune{}, Cursor: 0, Modified: false}
 }
 
 func NewLine1(text string) *Line {
-	return &Line{Text: text, Cursor: 0, Modified: false}
+	return &Line{Text: []rune(text), Cursor: 0, Modified: false}
 }
 
 func (this *Line) Size() int {
@@ -24,17 +24,17 @@ func (this *Line) Size() int {
 }
 
 func (this *Line) SetCursor(cursor int) {
-  log.Printf("setting cursor column to %d", cursor)
-  if(cursor < 0 || cursor >= len(this.Text)) {
-    return
-  }
+	log.Printf("setting cursor column to %d", cursor)
+	if cursor < 0 || cursor >= len(this.Text) {
+		return
+	}
 
-  this.Cursor = cursor
+	this.Cursor = cursor
 }
 
 // Clear all characters from line
 func (this *Line) Clear() {
-	this.Text = ""
+	this.Text = []rune{}
 	this.Cursor = 0
 	this.Modified = true
 }
@@ -77,18 +77,17 @@ func (this *Line) MoveForwardN(count int) {
 	}
 }
 
-// Insert string at cursor and advance
-// If first line of text is used
+// Inserts given string at cursor up to the first newline
 func (this *Line) InsertString(text string) {
 	text = strings.Split(text, "\n")[0]
-	this.Text = this.Text[:this.Cursor] + text + this.Text[this.Cursor:]
+	this.Text = append(this.Text[:this.Cursor], append([]rune(text), this.Text[this.Cursor:]...)...)
 	this.Cursor += len(text)
 	this.Modified = true
 }
 
 // Insert character at cursor and advance
-func (this *Line) InsertChar(b byte) {
-	this.Text = this.Text[:this.Cursor] + string(b) + this.Text[this.Cursor:]
+func (this *Line) Insert(r rune) {
+	this.Text = append(this.Text[:this.Cursor], append([]rune{r}, this.Text[this.Cursor:]...)...)
 	this.Cursor += 1
 	this.Modified = true
 }
@@ -99,7 +98,7 @@ func (this *Line) RemoveChar() {
 		return
 	}
 
-	this.Text = this.Text[:this.Cursor] + this.Text[this.Cursor+1:]
+	this.Text = append(this.Text[:this.Cursor], this.Text[this.Cursor+1:]...)
 	this.Modified = true
 	if this.Cursor >= len(this.Text) {
 		this.MoveToEnd()
@@ -115,7 +114,7 @@ func (this *Line) RemoveN(count int) {
 	if count <= 0 {
 		return
 	}
-	this.Text = this.Text[:this.Cursor] + this.Text[this.Cursor+count:]
+	this.Text = append(this.Text[:this.Cursor], this.Text[this.Cursor+count:]...)
 	this.Modified = true
 	if this.Cursor >= len(this.Text) {
 		this.MoveToEnd()
@@ -129,15 +128,15 @@ func (this *Line) AppendString(text string) {
 }
 
 // Insert character after cursor and advance
-func (this *Line) AppendChar(b byte) {
-	this.Cursor += 1
-	this.InsertChar(b)
+func (this *Line) Append(r rune) {
+	this.Cursor += 1 // to insert after cursor
+	this.Insert(r)
 }
 
 func (this *Line) JumpToNextChar(c rune) {
-  for i := this.Cursor; i < this.Size(); i++ {
-    if(this.Text[i] == byte(c)) {
-      this.Cursor = i
-    }
-  }
+	for i := this.Cursor; i < this.Size(); i++ {
+		if this.Text[i] == c {
+			this.Cursor = i
+		}
+	}
 }
