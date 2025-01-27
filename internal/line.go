@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"log"
 	"strings"
 )
 
@@ -24,7 +23,6 @@ func (this *Line) Size() int {
 }
 
 func (this *Line) SetCursor(cursor int) {
-	log.Printf("setting cursor column to %d", cursor)
 	if cursor < 0 || cursor >= len(this.Text) {
 		return
 	}

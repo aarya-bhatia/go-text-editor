@@ -21,7 +21,7 @@ func NewScreen() (tcell.Screen, func()) {
 	s.SetStyle(defStyle)
 	s.Clear()
 
-  quit := func() {
+	quit := func() {
 		// You have to catch panics in a defer, clean up, and
 		// re-raise them - otherwise your application can
 		// die without leaving any diagnostic trace.
@@ -132,6 +132,12 @@ func refreshScreen(s tcell.Screen, editor *Application) {
 		s.ShowCursor(cursorX, cursorY)
 
 	} else {
+		DrawBox(s, config.EDITOR_BOX_LEFT, config.EDITOR_BOX_TOP, config.EDITOR_BOX_LEFT+config.EDITOR_BOX_WIDTH,
+			config.EDITOR_BOX_TOP+config.EDITOR_BOX_HEIGHT, tcell.StyleDefault, []rune{})
+
+		DrawBox(s, config.STATUS_BOX_LEFT, config.STATUS_BOX_TOP, config.STATUS_BOX_LEFT+config.STATUS_BOX_WIDTH,
+			config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, []rune{})
+
 		s.ShowCursor(config.EDITOR_BOX_LEFT+1, config.EDITOR_BOX_HEIGHT+1)
 	}
 

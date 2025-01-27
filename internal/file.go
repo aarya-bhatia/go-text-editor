@@ -19,19 +19,27 @@ func (this *File) AdjustScroll() {
   // adjust horizontal scroll
   line := this.GetCurrentLine()
 	if line.Cursor-this.ScrollX < 0 {
-		log.Println("scrolling left")
+		if config.DEBUG {
+      log.Println("scrolling left")
+    }
 		this.ScrollX = line.Cursor
 	} else if line.Cursor-this.ScrollX >= config.MAX_DISPLAY_COLS {
-		log.Println("scrolling right")
+		if config.DEBUG {
+      log.Println("scrolling right")
+    }
 		this.ScrollX = line.Cursor - config.MAX_DISPLAY_COLS + 1
 	}
 
   // adjust vertical scroll
 	if this.CursorLine-this.ScrollY < 0 {
-		log.Println("scrolling up")
+		if config.DEBUG {
+      log.Println("scrolling up")
+    }
 		this.ScrollY = this.CursorLine
 	} else if this.CursorLine-this.ScrollY >= config.MAX_DISPLAY_LINES {
-		log.Println("scrolling down")
+		if config.DEBUG {
+      log.Println("scrolling down")
+    }
 		this.ScrollY = this.CursorLine - config.MAX_DISPLAY_LINES + 1
 	}
 }

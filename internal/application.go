@@ -155,3 +155,16 @@ func (this *Application) OpenAll(filenames []string) {
 		this.CurrentFile = this.Files[0]
 	}
 }
+
+func (this *Application) Quit() {
+	log.Println("Setting quit signal")
+	this.QuitSignal = true
+}
+
+func (this *Application) GotoLine(lineNo int) {
+		if this.CurrentFile != nil {
+			log.Println("Move to line ", lineNo)
+			this.CurrentFile.SetYCursor(lineNo)
+			return
+		}
+}

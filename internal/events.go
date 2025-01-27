@@ -1,16 +1,17 @@
 package internal
 
 import (
-	"log"
-	"strconv"
-
 	"github.com/gdamore/tcell/v2"
+	"go-editor/config"
+	"log"
 )
 
 var userCommand string = ""
 
 func handleKeyEvent(event *tcell.EventKey, editor *Application, screen tcell.Screen) {
-	log.Println("Got key", event.Name())
+	if config.DEBUG {
+		log.Println("Got key", event.Name())
+	}
 
 	if event.Key() == tcell.KeyCtrlC {
 		log.Println("Setting quit signal")
@@ -37,12 +38,14 @@ func handleKeyEvent(event *tcell.EventKey, editor *Application, screen tcell.Scr
 		handleKeyInNormalModeArgPending(event, editor)
 	}
 
-	if editor.CurrentFile != nil {
-		log.Printf("Cursor: %d,%d | Scroll: %d,%d",
-			editor.CurrentFile.CursorLine,
-			editor.CurrentFile.GetCurrentLine().Cursor,
-			editor.CurrentFile.ScrollX,
-			editor.CurrentFile.ScrollY)
+	if config.DEBUG {
+		if editor.CurrentFile != nil {
+			log.Printf("Cursor: %d,%d | Scroll: %d,%d",
+				editor.CurrentFile.CursorLine,
+				editor.CurrentFile.GetCurrentLine().Cursor,
+				editor.CurrentFile.ScrollX,
+				editor.CurrentFile.ScrollY)
+		}
 	}
 }
 
@@ -99,7 +102,7 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *Application) {
 		editor.Mode = NORMAL_MODE
 		handleUserCommand(editor)
 	} else if event.Key() == tcell.KeyBS || event.Key() == tcell.KeyBackspace2 {
-    userCommand = userCommand[:len(userCommand)-1]
+		userCommand = userCommand[:len(userCommand)-1]
 		editor.StatusLine = userCommand
 	} else if event.Rune() != 0 {
 		userCommand += string(event.Rune())
@@ -114,23 +117,6 @@ func handleKeyInInsertMode(event *tcell.EventKey, editor *Application) {
 	} else if event.Rune() != 0 {
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.Insert(event.Rune())
-		}
-	}
-}
-
-func handleUserCommand(editor *Application) {
-	if userCommand == "q" || userCommand == "quit" || userCommand == "exit" {
-		log.Println("Setting quit signal")
-		editor.QuitSignal = true
-		return
-	}
-
-	userNumber, err := strconv.Atoi(userCommand) // check if its a numeral
-	if err == nil {
-		if editor.CurrentFile != nil {
-			log.Println("Move to line ", userNumber)
-			editor.CurrentFile.SetYCursor(userNumber)
-			return
 		}
 	}
 }
