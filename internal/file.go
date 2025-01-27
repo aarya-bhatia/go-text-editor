@@ -178,6 +178,10 @@ func (this *File) CountLines() int {
 	return len(this.Lines)
 }
 
+func (this *File) JumpToNextChar(c rune) {
+  this.GetCurrentLine().JumpToNextChar(c)
+}
+
 // func (this *File) Paste(text string) {
 // 	if len(text) == 0 {
 // 		return

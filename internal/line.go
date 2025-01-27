@@ -133,3 +133,11 @@ func (this *Line) AppendChar(b byte) {
 	this.Cursor += 1
 	this.InsertChar(b)
 }
+
+func (this *Line) JumpToNextChar(c rune) {
+  for i := this.Cursor; i < this.Size(); i++ {
+    if(this.Text[i] == byte(c)) {
+      this.Cursor = i
+    }
+  }
+}

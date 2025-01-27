@@ -50,7 +50,7 @@ func handleKeyEvent(event *tcell.EventKey, editor *internal.Application, screen 
 func handleKeyInNormalModeArgPending(event *tcell.EventKey, editor *internal.Application) {
 	editor.Mode = internal.NORMAL_MODE
 	if event.Rune() != 0 {
-		// editor.CurrentFile.FindChar(event.Rune())
+		editor.CurrentFile.JumpToNextChar(event.Rune())
 	}
 }
 
@@ -99,6 +99,9 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *internal.Application)
 	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
 		editor.Mode = internal.NORMAL_MODE
 		handleUserCommand(editor)
+	} else if event.Key() == tcell.KeyBS || event.Key() == tcell.KeyBackspace2 {
+    userCommand = userCommand[:len(userCommand)-1]
+		editor.StatusLine = userCommand
 	} else if event.Rune() != 0 {
 		userCommand += string(event.Rune())
 		editor.StatusLine = userCommand
