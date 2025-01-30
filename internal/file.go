@@ -15,7 +15,7 @@ type File struct {
 	ScrollY    int
 }
 
-func (this *File) AdjustScroll() {
+func (this *File) AdjustScroll(viewModel *ViewModel) {
 	// adjust horizontal scroll
 	line := this.GetCurrentLine()
 	if line.Cursor-this.ScrollX < 0 {
@@ -23,11 +23,11 @@ func (this *File) AdjustScroll() {
 			log.Println("scrolling left")
 		}
 		this.ScrollX = line.Cursor
-	} else if line.Cursor-this.ScrollX >= config.MAX_DISPLAY_COLS {
+	} else if line.Cursor-this.ScrollX >= viewModel.GetMaxDisplayCols() {
 		if config.DEBUG {
 			log.Println("scrolling right")
 		}
-		this.ScrollX = line.Cursor - config.MAX_DISPLAY_COLS + 1
+		this.ScrollX = line.Cursor - viewModel.GetMaxDisplayCols() + 1
 	}
 
 	// adjust vertical scroll
@@ -36,11 +36,11 @@ func (this *File) AdjustScroll() {
 			log.Println("scrolling up")
 		}
 		this.ScrollY = this.CursorLine
-	} else if this.CursorLine-this.ScrollY >= config.MAX_DISPLAY_LINES {
+	} else if this.CursorLine-this.ScrollY >= viewModel.GetMaxDisplayLines() {
 		if config.DEBUG {
 			log.Println("scrolling down")
 		}
-		this.ScrollY = this.CursorLine - config.MAX_DISPLAY_LINES + 1
+		this.ScrollY = this.CursorLine - viewModel.GetMaxDisplayLines() + 1
 	}
 }
 

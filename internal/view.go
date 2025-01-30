@@ -2,37 +2,51 @@ package internal
 
 import (
 	"fmt"
-	"go-editor/config"
 	"log"
 
 	"github.com/gdamore/tcell/v2"
 )
 
-func NewScreen() (tcell.Screen, func()) {
-	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
+type ViewModel struct {
+	Screen tcell.Screen
 
-	s, err := tcell.NewScreen()
-	if err != nil {
-		log.Fatalf("%+v", err)
-	}
-	if err := s.Init(); err != nil {
-		log.Fatalf("%+v", err)
-	}
-	s.SetStyle(defStyle)
-	s.Clear()
+	EditorBoxTop    int
+	EditorBoxLeft   int
+	EditorBoxWidth  int
+	EditorBoxHeight int
 
-	quit := func() {
-		// You have to catch panics in a defer, clean up, and
-		// re-raise them - otherwise your application can
-		// die without leaving any diagnostic trace.
-		maybePanic := recover()
-		s.Fini()
-		if maybePanic != nil {
-			panic(maybePanic)
-		}
-	}
+	StatusBoxTop    int
+	StatusBoxLeft   int
+	StatusBoxWidth  int
+	StatusBoxHeight int
+}
 
-	return s, quit
+func NewViewModel(screen tcell.Screen) *ViewModel {
+	width, height := screen.Size()
+
+	const gapX = 2
+	const gapY = 2
+
+	viewModel := new(ViewModel)
+	viewModel.Screen = screen
+	viewModel.StatusBoxHeight = 2
+	viewModel.EditorBoxTop = gapY
+	viewModel.EditorBoxLeft = gapX
+	viewModel.EditorBoxWidth = width - 2*gapX
+	viewModel.EditorBoxHeight = height - 3*gapY - viewModel.StatusBoxHeight
+	viewModel.StatusBoxTop = viewModel.EditorBoxHeight + 2*gapY
+	viewModel.StatusBoxLeft = gapX
+	viewModel.StatusBoxWidth = width - 2*gapX
+
+	return viewModel
+}
+
+func (this *ViewModel) GetMaxDisplayLines() int {
+	return this.EditorBoxHeight - 2
+}
+
+func (this *ViewModel) GetMaxDisplayCols() int {
+	return this.EditorBoxWidth - 2
 }
 
 func getModeName(mode int) string {
@@ -48,7 +62,7 @@ func getModeName(mode int) string {
 	}
 }
 
-func getVisibleText(file *File) [][]rune {
+func (this *ViewModel) getVisibleText(file *File) [][]rune {
 	displayLines := make([][]rune, 0)
 
 	lines := file.Lines
@@ -60,8 +74,8 @@ func getVisibleText(file *File) [][]rune {
 			lines = make([]*Line, 0)
 		}
 	}
-	if len(lines) > config.MAX_DISPLAY_LINES {
-		lines = lines[:config.MAX_DISPLAY_LINES]
+	if len(lines) > this.GetMaxDisplayLines() {
+		lines = lines[:this.GetMaxDisplayLines()]
 	}
 
 	for _, line := range lines {
@@ -75,12 +89,12 @@ func getVisibleText(file *File) [][]rune {
 		}
 
 		blank_line := ""
-		for i := 0; i < config.MAX_DISPLAY_COLS; i++ {
+		for i := 0; i < this.GetMaxDisplayCols(); i++ {
 			blank_line += " "
 		}
 
 		text = append(text, []rune(blank_line)...) // pad line with blank spaces
-		text = text[:config.MAX_DISPLAY_COLS]
+		text = text[:this.GetMaxDisplayCols()]
 
 		displayLines = append(displayLines, text)
 	}
@@ -88,7 +102,7 @@ func getVisibleText(file *File) [][]rune {
 	return displayLines
 }
 
-func getDisplayCursor(file *File) (int, int) {
+func (this *ViewModel) getDisplayCursor(file *File) (int, int) {
 	displayCursorX := file.GetCurrentLine().Cursor - file.ScrollX
 	displayCursorY := file.CursorLine - file.ScrollY
 
@@ -102,44 +116,57 @@ func getDisplayCursor(file *File) (int, int) {
 		displayCursorX = 0
 	}
 
-	displayCursorX += config.EDITOR_BOX_LEFT + 1
-	displayCursorY += config.EDITOR_BOX_TOP + 1
+	displayCursorX += this.EditorBoxLeft + 1
+	displayCursorY += this.EditorBoxTop + 1
 
 	return displayCursorX, displayCursorY
 }
 
-func displayFile(s tcell.Screen, file *File) {
+func (this *ViewModel) displayFile(file *File) {
 
-	displayLines := getVisibleText(file)
+	displayLines := this.getVisibleText(file)
 	displayString := FlattenList(displayLines)
-
-	DrawBox(s, config.EDITOR_BOX_LEFT, config.EDITOR_BOX_TOP, config.EDITOR_BOX_LEFT+config.EDITOR_BOX_WIDTH,
-		config.EDITOR_BOX_TOP+config.EDITOR_BOX_HEIGHT, tcell.StyleDefault, displayString)
+	this.renderEditorBox(displayString)
 }
 
-func refreshScreen(s tcell.Screen, editor *Application) {
-	s.Clear()
+func (this *ViewModel) renderEditorBox(text []rune) {
+	DrawBox(this.Screen, this.EditorBoxLeft,
+		this.EditorBoxTop, this.EditorBoxLeft+this.EditorBoxWidth,
+		this.EditorBoxTop+this.EditorBoxHeight, tcell.StyleDefault, text)
+}
+
+func (this *ViewModel) renderStatusBox(text []rune) {
+	DrawBox(this.Screen, this.StatusBoxLeft,
+		this.StatusBoxTop, this.StatusBoxLeft+this.StatusBoxWidth,
+		this.StatusBoxTop+this.StatusBoxHeight, tcell.StyleDefault, text)
+}
+
+func getStatusLine(editor *Application) string {
+	return fmt.Sprintf("[%s] %s", getModeName(editor.Mode), editor.StatusLine)
+}
+
+func (this *ViewModel) renderCursor(x int, y int) {
+	this.Screen.ShowCursor(x, y)
+}
+
+func (this *ViewModel) render(editor *Application) {
+	this.Screen.Clear()
 
 	if editor.CurrentFile != nil {
-		editor.CurrentFile.AdjustScroll()
-		displayFile(s, editor.CurrentFile)
+		editor.CurrentFile.AdjustScroll(this)
+		this.displayFile(editor.CurrentFile)
 
-		statusLineWithModename := fmt.Sprintf("[%s] %s", getModeName(editor.Mode), editor.StatusLine)
-		DrawBox(s, config.STATUS_BOX_LEFT, config.STATUS_BOX_TOP, config.STATUS_BOX_LEFT+config.STATUS_BOX_WIDTH,
-			config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, []rune(statusLineWithModename))
+		this.renderStatusBox([]rune(getStatusLine(editor)))
 
-		cursorX, cursorY := getDisplayCursor(editor.CurrentFile)
-		s.ShowCursor(cursorX, cursorY)
+		cursorX, cursorY := this.getDisplayCursor(editor.CurrentFile)
+		this.renderCursor(cursorX, cursorY)
 
 	} else {
-		DrawBox(s, config.EDITOR_BOX_LEFT, config.EDITOR_BOX_TOP, config.EDITOR_BOX_LEFT+config.EDITOR_BOX_WIDTH,
-			config.EDITOR_BOX_TOP+config.EDITOR_BOX_HEIGHT, tcell.StyleDefault, []rune{})
-
-		DrawBox(s, config.STATUS_BOX_LEFT, config.STATUS_BOX_TOP, config.STATUS_BOX_LEFT+config.STATUS_BOX_WIDTH,
-			config.STATUS_BOX_TOP+config.STATUS_BOX_HEIGHT, tcell.StyleDefault, []rune{})
-
-		s.ShowCursor(config.EDITOR_BOX_LEFT+1, config.EDITOR_BOX_HEIGHT+1)
+		this.renderEditorBox([]rune{})
+		this.renderStatusBox([]rune{})
+		this.renderStatusBox([]rune(getStatusLine(editor)))
+		this.renderCursor(this.EditorBoxLeft+1, this.EditorBoxTop+1)
 	}
 
-	s.Show()
+	this.Screen.Show()
 }

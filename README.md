@@ -40,6 +40,7 @@ go build .
 - DONE open and edit multiple files
 - DONE insert utf8 text
 - DONE auto-scroll when jumping cursor goes off-screen
+- TODO dynamic size for boxes
 - TODO fix ui window sizes 
 - TODO make separate status line and command line windows
 - TODO handle screen refresh
