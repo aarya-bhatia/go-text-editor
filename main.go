@@ -16,8 +16,8 @@ func main() {
 	// Redirect log output to the file
 	log.SetOutput(logFile)
 
-  filenames := os.Args[1:]
+	filenames := os.Args[1:]
 
-  // Run application
+	// Run application
 	internal.Start(filenames)
 }
