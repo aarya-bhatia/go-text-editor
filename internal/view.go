@@ -9,44 +9,40 @@ import (
 
 type ViewModel struct {
 	Screen tcell.Screen
-
-	EditorBoxTop    int
-	EditorBoxLeft   int
-	EditorBoxWidth  int
-	EditorBoxHeight int
-
-	StatusBoxTop    int
-	StatusBoxLeft   int
-	StatusBoxWidth  int
-	StatusBoxHeight int
+	Width  int
+	Height int
 }
 
 func NewViewModel(screen tcell.Screen) *ViewModel {
-	width, height := screen.Size()
-
-	const gapX = 2
-	const gapY = 2
-
 	viewModel := new(ViewModel)
 	viewModel.Screen = screen
-	viewModel.StatusBoxHeight = 2
-	viewModel.EditorBoxTop = gapY
-	viewModel.EditorBoxLeft = gapX
-	viewModel.EditorBoxWidth = width - 2*gapX
-	viewModel.EditorBoxHeight = height - 3*gapY - viewModel.StatusBoxHeight
-	viewModel.StatusBoxTop = viewModel.EditorBoxHeight + 2*gapY
-	viewModel.StatusBoxLeft = gapX
-	viewModel.StatusBoxWidth = width - 2*gapX
-
+	viewModel.Width, viewModel.Height = screen.Size()
 	return viewModel
 }
 
-func (this *ViewModel) GetMaxDisplayLines() int {
-	return this.EditorBoxHeight - 2
+func (this *ViewModel) GetMaxEditorLines() int {
+	return this.Height - 3
 }
 
-func (this *ViewModel) GetMaxDisplayCols() int {
-	return this.EditorBoxWidth - 2
+func (this *ViewModel) GetMaxEditorCols() int {
+	return this.Width - 2
+}
+
+func (this *ViewModel) drawBorder() {
+
+	for col := 1; col < this.Width-1; col++ {
+		this.Screen.SetContent(col, 0, tcell.RuneHLine, nil, tcell.StyleDefault)
+		this.Screen.SetContent(col, this.Height-2, tcell.RuneHLine, nil, tcell.StyleDefault)
+	}
+	for row := 1; row < this.Height-2; row++ {
+		this.Screen.SetContent(0, row, tcell.RuneVLine, nil, tcell.StyleDefault)
+		this.Screen.SetContent(this.Width-1, row, tcell.RuneVLine, nil, tcell.StyleDefault)
+	}
+
+	this.Screen.SetContent(0, 0, tcell.RuneULCorner, nil, tcell.StyleDefault)
+	this.Screen.SetContent(this.Width-1, 0, tcell.RuneURCorner, nil, tcell.StyleDefault)
+	this.Screen.SetContent(0, this.Height-2, tcell.RuneLLCorner, nil, tcell.StyleDefault)
+	this.Screen.SetContent(this.Width-1, this.Height-2, tcell.RuneLRCorner, nil, tcell.StyleDefault)
 }
 
 func getModeName(mode int) string {
@@ -74,8 +70,8 @@ func (this *ViewModel) getVisibleText(file *File) [][]rune {
 			lines = make([]*Line, 0)
 		}
 	}
-	if len(lines) > this.GetMaxDisplayLines() {
-		lines = lines[:this.GetMaxDisplayLines()]
+	if len(lines) > this.GetMaxEditorLines() {
+		lines = lines[:this.GetMaxEditorLines()]
 	}
 
 	for _, line := range lines {
@@ -89,12 +85,12 @@ func (this *ViewModel) getVisibleText(file *File) [][]rune {
 		}
 
 		blank_line := ""
-		for i := 0; i < this.GetMaxDisplayCols(); i++ {
+		for i := 0; i < this.GetMaxEditorCols(); i++ {
 			blank_line += " "
 		}
 
 		text = append(text, []rune(blank_line)...) // pad line with blank spaces
-		text = text[:this.GetMaxDisplayCols()]
+		text = text[:this.GetMaxEditorCols()]
 
 		displayLines = append(displayLines, text)
 	}
@@ -116,8 +112,8 @@ func (this *ViewModel) getDisplayCursor(file *File) (int, int) {
 		displayCursorX = 0
 	}
 
-	displayCursorX += this.EditorBoxLeft + 1
-	displayCursorY += this.EditorBoxTop + 1
+	displayCursorX += 1
+	displayCursorY += 2
 
 	return displayCursorX, displayCursorY
 }
@@ -130,15 +126,7 @@ func (this *ViewModel) displayFile(file *File) {
 }
 
 func (this *ViewModel) renderEditorBox(text []rune) {
-	DrawBox(this.Screen, this.EditorBoxLeft,
-		this.EditorBoxTop, this.EditorBoxLeft+this.EditorBoxWidth,
-		this.EditorBoxTop+this.EditorBoxHeight, tcell.StyleDefault, text)
-}
-
-func (this *ViewModel) renderStatusBox(text []rune) {
-	DrawBox(this.Screen, this.StatusBoxLeft,
-		this.StatusBoxTop, this.StatusBoxLeft+this.StatusBoxWidth,
-		this.StatusBoxTop+this.StatusBoxHeight, tcell.StyleDefault, text)
+	DrawBox(this.Screen, 0, 0, this.Width, this.Height-2, tcell.StyleDefault, text)
 }
 
 func getStatusLine(editor *Application) string {
@@ -152,20 +140,32 @@ func (this *ViewModel) renderCursor(x int, y int) {
 func (this *ViewModel) render(editor *Application) {
 	this.Screen.Clear()
 
-	if editor.CurrentFile != nil {
-		editor.CurrentFile.AdjustScroll(this)
-		this.displayFile(editor.CurrentFile)
+	this.drawBorder()
 
-		this.renderStatusBox([]rune(getStatusLine(editor)))
+	statusline := []rune{}
+	for i := 0; i < this.Width; i++ {
+		statusline = append(statusline, ' ')
+	}
+
+	statusvalue := []rune(getStatusLine(editor))
+	for i := 0; i < min(len(statusline)-1, len(statusvalue)); i++ {
+		statusline[i+1] = statusvalue[i]
+	}
+
+	DrawText(this.Screen, 0, this.Height-1, this.Width, this.Height-1,
+		tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite),
+		statusline)
+
+	if editor.CurrentFile != nil {
+		editor.CurrentFile.AdjustScroll(this.Height, this.Width)
+		this.displayFile(editor.CurrentFile)
 
 		cursorX, cursorY := this.getDisplayCursor(editor.CurrentFile)
 		this.renderCursor(cursorX, cursorY)
 
 	} else {
 		this.renderEditorBox([]rune{})
-		this.renderStatusBox([]rune{})
-		this.renderStatusBox([]rune(getStatusLine(editor)))
-		this.renderCursor(this.EditorBoxLeft+1, this.EditorBoxTop+1)
+		this.renderCursor(1, 1)
 	}
 
 	this.Screen.Show()
