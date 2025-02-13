@@ -29,6 +29,11 @@ func NewApplication() *Application {
 // Create new file and make it current
 func (this *Application) AddFile(filename string) error {
 	var file *File = NewFile(filename)
+  err := file.ReadFile()
+  if err != nil { 
+    return err
+  }
+
 	this.Files = append(this.Files, file)
 	this.CurrentFile = file
 	log.Println("new file added: ", filename)
