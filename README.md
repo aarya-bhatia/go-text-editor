@@ -6,16 +6,10 @@ This is a terminal-based application made with Go using the
 [tcell](github.com/gdamore/tcell/v2) library. It is inspired by the vim text
 editor. It was created as a fun learning project.
 
-## Build
-
-```
-go build .
-```
-
 ## Run
 
 ```
-./go-editor [<filename1> [<filename2>...] ]
+go run . [<filename1> [<filename2>...] ]
 ```
 
 ## Insert mode
@@ -27,6 +21,10 @@ go build .
 - `:<line>`: go to line
 - `:next`: open next file
 - `:prev`: open prev file
+- `:open <filename>`: open and load file if exists
+- `:close`: close current file
+- `:closeall`: close all files
+- `:ls`: print open files to log file - TODO show files in a popup
 
 ## Normal mode
 - `hjkl`: move left/down/up/right
@@ -51,4 +49,5 @@ go build .
 - TODO command mode - run external commands on current line
 - TODO command mode - run external commands on entire file
 - TODO add visual mode
+- TODO impl popup to show longer info messages to user
 
