@@ -111,9 +111,11 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *Application) {
 }
 
 func handleKeyInInsertMode(event *tcell.EventKey, editor *Application) {
-	if event.Key() == tcell.KeyEnter || event.Key() == tcell.KeyEscape {
-		editor.Mode = NORMAL_MODE
-		handleUserCommand(editor)
+  if event.Key() == tcell.KeyEscape {
+    editor.Mode = NORMAL_MODE
+  } else if event.Key() == tcell.KeyEnter {
+    editor.CurrentFile.InsertLineBelowCursor()
+    editor.CurrentFile.CursorLine += 1
 	} else if event.Rune() != 0 {
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.Insert(event.Rune())

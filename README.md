@@ -50,4 +50,5 @@ go run . [<filename1> [<filename2>...] ]
 - TODO command mode - run external commands on entire file
 - TODO add visual mode
 - TODO impl popup to show longer info messages to user
+- TODO open temporary file for empty buffer
 
