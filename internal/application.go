@@ -17,99 +17,99 @@ type Application struct {
 
 // Returns new application instance
 func NewApplication() *Application {
-	var this *Application = new(Application)
-	this.QuitSignal = false
-	this.Files = make([]*File, 0)
-	this.CurrentFile = nil
-	this.StatusLine = "Press CTRL+C to exit"
-	this.Mode = NORMAL_MODE
-	return this
+	var app *Application = new(Application)
+	app.QuitSignal = false
+	app.Files = make([]*File, 0)
+	app.CurrentFile = nil
+	app.StatusLine = "Press CTRL+C to exit"
+	app.Mode = NORMAL_MODE
+	return app
 }
 
 // Create new file and make it current
-func (this *Application) AddFile(filename string) error {
+func (app *Application) AddFile(filename string) error {
 	var file *File = NewFile(filename)
-  err := file.ReadFile()
-  if err != nil { 
-    return err
-  }
+	err := file.ReadFile()
+	if err != nil {
+		return err
+	}
 
-	this.Files = append(this.Files, file)
-	this.CurrentFile = file
+	app.Files = append(app.Files, file)
+	app.CurrentFile = file
 	log.Println("new file added: ", filename)
 
 	return nil
 }
 
 // Find file in buffer list or create it and make it current
-func (this *Application) OpenFile(filename string) error {
-	for _, file := range this.Files {
+func (app *Application) OpenFile(filename string) error {
+	for _, file := range app.Files {
 		if file.Name == filename {
-			this.CurrentFile = file
+			app.CurrentFile = file
 			return nil
 		}
 	}
 
-	return this.AddFile(filename)
+	return app.AddFile(filename)
 }
 
 // Close current file and replace it with the next file in buffer list.
-func (this *Application) CloseFile() {
-	if this.CurrentFile == nil || len(this.Files) == 0 {
+func (app *Application) CloseFile() {
+	if app.CurrentFile == nil || len(app.Files) == 0 {
 		log.Println("buffer list is empty")
 		return
 	}
 
-	if len(this.Files) == 1 {
-		this.CurrentFile = nil
-		this.Files = make([]*File, 0)
+	if len(app.Files) == 1 {
+		app.CurrentFile = nil
+		app.Files = make([]*File, 0)
 		return
 	}
 
-	for i, file := range this.Files {
-		if file == this.CurrentFile {
+	for i, file := range app.Files {
+		if file == app.CurrentFile {
 
-			if i+1 < len(this.Files) {
-				this.CurrentFile = this.Files[i+1]
+			if i+1 < len(app.Files) {
+				app.CurrentFile = app.Files[i+1]
 			} else {
-				this.CurrentFile = this.Files[0]
+				app.CurrentFile = app.Files[0]
 			}
 
 			newFiles := make([]*File, 0)
-			newFiles = append(newFiles, this.Files[:i]...)
-			newFiles = append(newFiles, this.Files[i+1:]...)
+			newFiles = append(newFiles, app.Files[:i]...)
+			newFiles = append(newFiles, app.Files[i+1:]...)
 
-			this.Files = newFiles
+			app.Files = newFiles
 			return
 		}
 	}
 }
 
 // Close all files
-func (this *Application) CloseAll() {
-	this.Files = make([]*File, 0)
-	this.CurrentFile = nil
+func (app *Application) CloseAll() {
+	app.Files = make([]*File, 0)
+	app.CurrentFile = nil
 }
 
 // Open the next file in buffer list
-func (this *Application) OpenNextFile() {
-	if this.CurrentFile == nil && len(this.Files) == 0 {
+func (app *Application) OpenNextFile() {
+	if app.CurrentFile == nil && len(app.Files) == 0 {
 		return
 	}
 
-	if this.CurrentFile == nil {
-		this.CurrentFile = this.Files[0]
+	if app.CurrentFile == nil {
+		app.CurrentFile = app.Files[0]
 		return
 	}
 
-	if this.CurrentFile == this.Files[len(this.Files)-1] {
-		this.CurrentFile = this.Files[0]
+	if app.CurrentFile == app.Files[len(app.Files)-1] {
+		app.CurrentFile = app.Files[0]
 		return
 	}
 
-	for i, file := range this.Files[:len(this.Files)-1] {
-		if file == this.CurrentFile {
-			this.CurrentFile = this.Files[i+1]
+	for i, file := range app.Files[:len(app.Files)-1] {
+		if file == app.CurrentFile {
+			app.CurrentFile = app.Files[i+1]
 			return
 		}
 	}
@@ -118,24 +118,24 @@ func (this *Application) OpenNextFile() {
 }
 
 // Open the previous file in buffer list
-func (this *Application) OpenPrevFile() {
-	if this.CurrentFile == nil && len(this.Files) == 0 {
+func (app *Application) OpenPrevFile() {
+	if app.CurrentFile == nil && len(app.Files) == 0 {
 		return
 	}
 
-	if this.CurrentFile == nil {
-		this.CurrentFile = this.Files[len(this.Files)-1]
+	if app.CurrentFile == nil {
+		app.CurrentFile = app.Files[len(app.Files)-1]
 		return
 	}
 
-	if this.CurrentFile == this.Files[0] {
-		this.CurrentFile = this.Files[len(this.Files)-1]
+	if app.CurrentFile == app.Files[0] {
+		app.CurrentFile = app.Files[len(app.Files)-1]
 		return
 	}
 
-	for i, file := range this.Files[1:] {
-		if file == this.CurrentFile {
-			this.CurrentFile = this.Files[(i+1)-1] // offset i because it is relative to 1-indexed array
+	for i, file := range app.Files[1:] {
+		if file == app.CurrentFile {
+			app.CurrentFile = app.Files[(i+1)-1] // offset i because it is relative to 1-indexed array
 			return
 		}
 	}
@@ -143,7 +143,7 @@ func (this *Application) OpenPrevFile() {
 	log.Println("No prev file")
 }
 
-func (this *Application) OpenAll(filenames []string) {
+func (app *Application) OpenAll(filenames []string) {
 	for _, filename := range filenames {
 		file := NewFile(filename)
 
@@ -153,23 +153,23 @@ func (this *Application) OpenAll(filenames []string) {
 		}
 
 		log.Printf("Opened file '%s' with %d lines.", filename, file.CountLines())
-		this.Files = append(this.Files, file)
+		app.Files = append(app.Files, file)
 	}
 
-	if len(this.Files) > 0 {
-		this.CurrentFile = this.Files[0]
+	if len(app.Files) > 0 {
+		app.CurrentFile = app.Files[0]
 	}
 }
 
-func (this *Application) Quit() {
+func (app *Application) Quit() {
 	log.Println("Setting quit signal")
-	this.QuitSignal = true
+	app.QuitSignal = true
 }
 
-func (this *Application) GotoLine(lineNo int) {
-		if this.CurrentFile != nil {
-			log.Println("Move to line ", lineNo)
-			this.CurrentFile.SetYCursor(lineNo)
-			return
-		}
+func (app *Application) GotoLine(lineNo int) {
+	if app.CurrentFile != nil {
+		log.Println("Move to line ", lineNo)
+		app.CurrentFile.SetYCursor(lineNo)
+		return
+	}
 }

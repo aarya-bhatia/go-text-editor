@@ -113,6 +113,13 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *Application) {
 func handleKeyInInsertMode(event *tcell.EventKey, editor *Application) {
   if event.Key() == tcell.KeyEscape {
     editor.Mode = NORMAL_MODE
+	} else if event.Key() == tcell.KeyBS || event.Key() == tcell.KeyBackspace2 {
+    if editor.CurrentFile.GetCurrentLine().Size() == 0 {
+      editor.CurrentFile.DeleteLine()
+      editor.CurrentFile.GetCurrentLine().MoveToEnd()
+    } else {
+      editor.CurrentFile.GetCurrentLine().RemoveChar()
+    }
   } else if event.Key() == tcell.KeyEnter {
     editor.CurrentFile.InsertLineBelowCursor()
     editor.CurrentFile.CursorLine += 1

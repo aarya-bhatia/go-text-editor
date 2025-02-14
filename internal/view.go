@@ -41,12 +41,12 @@ func NewViewModel(screen tcell.Screen) *ViewModel {
 	return viewModel
 }
 
-func (this *ViewModel) GetMaxDisplayLines() int {
-	return this.EditorBoxHeight - 2
+func (view *ViewModel) GetMaxDisplayLines() int {
+	return view.EditorBoxHeight - 2
 }
 
-func (this *ViewModel) GetMaxDisplayCols() int {
-	return this.EditorBoxWidth - 2
+func (view *ViewModel) GetMaxDisplayCols() int {
+	return view.EditorBoxWidth - 2
 }
 
 func getModeName(mode int) string {
@@ -62,7 +62,7 @@ func getModeName(mode int) string {
 	}
 }
 
-func (this *ViewModel) getVisibleText(file *File) [][]rune {
+func (view *ViewModel) getVisibleText(file *File) [][]rune {
 	displayLines := make([][]rune, 0)
 
 	lines := file.Lines
@@ -74,8 +74,8 @@ func (this *ViewModel) getVisibleText(file *File) [][]rune {
 			lines = make([]*Line, 0)
 		}
 	}
-	if len(lines) > this.GetMaxDisplayLines() {
-		lines = lines[:this.GetMaxDisplayLines()]
+	if len(lines) > view.GetMaxDisplayLines() {
+		lines = lines[:view.GetMaxDisplayLines()]
 	}
 
 	for _, line := range lines {
@@ -89,12 +89,12 @@ func (this *ViewModel) getVisibleText(file *File) [][]rune {
 		}
 
 		blank_line := ""
-		for i := 0; i < this.GetMaxDisplayCols(); i++ {
+		for i := 0; i < view.GetMaxDisplayCols(); i++ {
 			blank_line += " "
 		}
 
 		text = append(text, []rune(blank_line)...) // pad line with blank spaces
-		text = text[:this.GetMaxDisplayCols()]
+		text = text[:view.GetMaxDisplayCols()]
 
 		displayLines = append(displayLines, text)
 	}
@@ -102,7 +102,7 @@ func (this *ViewModel) getVisibleText(file *File) [][]rune {
 	return displayLines
 }
 
-func (this *ViewModel) getDisplayCursor(file *File) (int, int) {
+func (view *ViewModel) getDisplayCursor(file *File) (int, int) {
 	displayCursorX := file.GetCurrentLine().Cursor - file.ScrollX
 	displayCursorY := file.CursorLine - file.ScrollY
 
@@ -116,57 +116,57 @@ func (this *ViewModel) getDisplayCursor(file *File) (int, int) {
 		displayCursorX = 0
 	}
 
-	displayCursorX += this.EditorBoxLeft + 1
-	displayCursorY += this.EditorBoxTop + 1
+	displayCursorX += view.EditorBoxLeft + 1
+	displayCursorY += view.EditorBoxTop + 1
 
 	return displayCursorX, displayCursorY
 }
 
-func (this *ViewModel) displayFile(file *File) {
+func (view *ViewModel) displayFile(file *File) {
 
-	displayLines := this.getVisibleText(file)
+	displayLines := view.getVisibleText(file)
 	displayString := FlattenList(displayLines)
-	this.renderEditorBox(displayString)
+	view.renderEditorBox(displayString)
 }
 
-func (this *ViewModel) renderEditorBox(text []rune) {
-	DrawBox(this.Screen, this.EditorBoxLeft,
-		this.EditorBoxTop, this.EditorBoxLeft+this.EditorBoxWidth,
-		this.EditorBoxTop+this.EditorBoxHeight, tcell.StyleDefault, text)
+func (view *ViewModel) renderEditorBox(text []rune) {
+	DrawBox(view.Screen, view.EditorBoxLeft,
+		view.EditorBoxTop, view.EditorBoxLeft+view.EditorBoxWidth,
+		view.EditorBoxTop+view.EditorBoxHeight, tcell.StyleDefault, text)
 }
 
-func (this *ViewModel) renderStatusBox(text []rune) {
-	DrawBox(this.Screen, this.StatusBoxLeft,
-		this.StatusBoxTop, this.StatusBoxLeft+this.StatusBoxWidth,
-		this.StatusBoxTop+this.StatusBoxHeight, tcell.StyleDefault, text)
+func (view *ViewModel) renderStatusBox(text []rune) {
+	DrawBox(view.Screen, view.StatusBoxLeft,
+		view.StatusBoxTop, view.StatusBoxLeft+view.StatusBoxWidth,
+		view.StatusBoxTop+view.StatusBoxHeight, tcell.StyleDefault, text)
 }
 
 func getStatusLine(editor *Application) string {
 	return fmt.Sprintf("[%s] %s", getModeName(editor.Mode), editor.StatusLine)
 }
 
-func (this *ViewModel) renderCursor(x int, y int) {
-	this.Screen.ShowCursor(x, y)
+func (view *ViewModel) renderCursor(x int, y int) {
+	view.Screen.ShowCursor(x, y)
 }
 
-func (this *ViewModel) render(editor *Application) {
-	this.Screen.Clear()
+func (view *ViewModel) render(editor *Application) {
+	view.Screen.Clear()
 
 	if editor.CurrentFile != nil {
-		editor.CurrentFile.AdjustScroll(this)
-		this.displayFile(editor.CurrentFile)
+		editor.CurrentFile.AdjustScroll(view)
+		view.displayFile(editor.CurrentFile)
 
-		this.renderStatusBox([]rune(getStatusLine(editor)))
+		view.renderStatusBox([]rune(getStatusLine(editor)))
 
-		cursorX, cursorY := this.getDisplayCursor(editor.CurrentFile)
-		this.renderCursor(cursorX, cursorY)
+		cursorX, cursorY := view.getDisplayCursor(editor.CurrentFile)
+		view.renderCursor(cursorX, cursorY)
 
 	} else {
-		this.renderEditorBox([]rune{})
-		this.renderStatusBox([]rune{})
-		this.renderStatusBox([]rune(getStatusLine(editor)))
-		this.renderCursor(this.EditorBoxLeft+1, this.EditorBoxTop+1)
+		view.renderEditorBox([]rune{})
+		view.renderStatusBox([]rune{})
+		view.renderStatusBox([]rune(getStatusLine(editor)))
+		view.renderCursor(view.EditorBoxLeft+1, view.EditorBoxTop+1)
 	}
 
-	this.Screen.Show()
+	view.Screen.Show()
 }

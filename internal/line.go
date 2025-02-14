@@ -18,123 +18,160 @@ func NewLine1(text string) *Line {
 	return &Line{Text: []rune(text), Cursor: 0, Modified: false}
 }
 
-func (this *Line) Size() int {
-	return len(this.Text)
+func (line *Line) Size() int {
+	return len(line.Text)
 }
 
-func (this *Line) SetCursor(cursor int) {
-	if cursor < 0 || cursor >= len(this.Text) {
+func (line *Line) SetCursor(cursor int) {
+	if cursor < 0 || cursor >= len(line.Text) {
 		return
 	}
 
-	this.Cursor = cursor
+	line.Cursor = cursor
 }
 
 // Clear all characters from line
-func (this *Line) Clear() {
-	this.Text = []rune{}
-	this.Cursor = 0
-	this.Modified = true
+func (line *Line) Clear() {
+	line.Text = []rune{}
+	line.Cursor = 0
+	line.Modified = true
 }
 
 // Move cursor to last position
-func (this *Line) MoveToEnd() {
-	this.Cursor = len(this.Text) - 1
+func (line *Line) MoveToEnd() {
+	line.Cursor = len(line.Text) - 1
 }
 
 // Move cursor to fist position
-func (this *Line) MoveToStart() {
-	this.Cursor = 0
+func (line *Line) MoveToStart() {
+	line.Cursor = 0
 }
 
-func (this *Line) MoveBackward() {
-	if this.Cursor > 0 {
-		this.Cursor -= 1
+func (line *Line) MoveBackward() {
+	if line.Cursor > 0 {
+		line.Cursor -= 1
 	}
 }
 
-func (this *Line) MoveForward() {
-	if this.Cursor+1 < len(this.Text) {
-		this.Cursor += 1
+func (line *Line) MoveForward() {
+	if line.Cursor+1 < len(line.Text) {
+		line.Cursor += 1
 	}
 }
 
-func (this *Line) MoveBackwardN(count int) {
-	if this.Cursor-count < 0 {
-		this.Cursor = 0
+func (line *Line) MoveBackwardN(count int) {
+	if line.Cursor-count < 0 {
+		line.Cursor = 0
 	} else {
-		this.Cursor -= count
+		line.Cursor -= count
 	}
 }
 
-func (this *Line) MoveForwardN(count int) {
-	if this.Cursor+count >= len(this.Text) {
-		this.MoveToEnd()
+func (line *Line) MoveForwardN(count int) {
+	if line.Cursor+count >= len(line.Text) {
+		line.MoveToEnd()
 	} else {
-		this.Cursor += count
+		line.Cursor += count
 	}
 }
 
 // Inserts given string at cursor up to the first newline
-func (this *Line) InsertString(text string) {
+func (line *Line) InsertString(text string) {
 	text = strings.Split(text, "\n")[0]
-	this.Text = append(this.Text[:this.Cursor], append([]rune(text), this.Text[this.Cursor:]...)...)
-	this.Cursor += len(text)
-	this.Modified = true
+	newText := []rune{}
+	newText = append(newText, line.Text[:line.Cursor]...)
+	newText = append(newText, []rune(text)...)
+	newText = append(newText, line.Text[line.Cursor:]...)
+
+	line.Text = newText
+	line.Cursor += len(text)
+	line.Modified = true
 }
 
 // Insert character at cursor and advance
-func (this *Line) Insert(r rune) {
-	this.Text = append(this.Text[:this.Cursor], append([]rune{r}, this.Text[this.Cursor:]...)...)
-	this.Cursor += 1
-	this.Modified = true
+func (line *Line) Insert(r rune) {
+	newText := []rune{}
+	newText = append(newText, line.Text[:line.Cursor]...)
+	newText = append(newText, r)
+	newText = append(newText, line.Text[line.Cursor:]...)
+
+	line.Text = newText
+	line.Cursor += 1
+	line.Modified = true
 }
 
 // Remove character at cursor
-func (this *Line) RemoveChar() {
-	if len(this.Text) == 0 {
+func (line *Line) RemoveChar() {
+	if len(line.Text) == 0 || line.Cursor == 0 {
 		return
 	}
 
-	this.Text = append(this.Text[:this.Cursor], this.Text[this.Cursor+1:]...)
-	this.Modified = true
-	if this.Cursor >= len(this.Text) {
-		this.MoveToEnd()
+	if line.Cursor >= len(line.Text) {
+		line.Text = line.Text[:len(line.Text)]
+		line.MoveToEnd()
+		return
+	}
+
+	line.Text = append(line.Text[:line.Cursor], line.Text[line.Cursor+1:]...)
+	line.Modified = true
+	if line.Cursor >= len(line.Text) {
+		line.MoveToEnd()
 	}
 }
 
 // Remove *count* characters from cursor
-func (this *Line) RemoveN(count int) {
-	maxRemovable := len(this.Text) - this.Cursor
+func (line *Line) RemoveN(count int) {
+	maxRemovable := len(line.Text) - line.Cursor
 	if count > maxRemovable {
 		count = maxRemovable
 	}
 	if count <= 0 {
 		return
 	}
-	this.Text = append(this.Text[:this.Cursor], this.Text[this.Cursor+count:]...)
-	this.Modified = true
-	if this.Cursor >= len(this.Text) {
-		this.MoveToEnd()
+	line.Text = append(line.Text[:line.Cursor], line.Text[line.Cursor+count:]...)
+	line.Modified = true
+	if line.Cursor >= len(line.Text) {
+		line.MoveToEnd()
 	}
 }
 
 // Insert string after cursor and advance
-func (this *Line) AppendString(text string) {
-	this.Cursor += 1
-	this.InsertString(text)
+func (line *Line) AppendString(text string) {
+	if line.Cursor+1 >= len(line.Text) {
+		line.Text = append(line.Text, []rune(text)...)
+	} else {
+		newText := []rune{}
+		newText = append(newText, line.Text[:line.Cursor+1]...)
+		newText = append(newText, []rune(text)...)
+		newText = append(newText, line.Text[line.Cursor+1+len(text):]...)
+		line.Text = newText
+	}
+
+	line.Cursor += len(text)
+	line.Modified = true
+
 }
 
 // Insert character after cursor and advance
-func (this *Line) Append(r rune) {
-	this.Cursor += 1 // to insert after cursor
-	this.Insert(r)
+func (line *Line) Append(r rune) {
+	if line.Cursor+1 >= len(line.Text) {
+		line.Text = append(line.Text, r)
+	} else {
+		newText := []rune{}
+		newText = append(newText, line.Text[:line.Cursor+1]...)
+		newText = append(newText, r)
+		newText = append(newText, line.Text[line.Cursor+2:]...)
+		line.Text = newText
+	}
+
+	line.Cursor += 1
+	line.Modified = true
 }
 
-func (this *Line) JumpToNextChar(c rune) {
-	for i := this.Cursor; i < this.Size(); i++ {
-		if this.Text[i] == c {
-			this.Cursor = i
+func (line *Line) JumpToNextChar(c rune) {
+	for i := line.Cursor; i < line.Size(); i++ {
+		if line.Text[i] == c {
+			line.Cursor = i
 		}
 	}
 }

@@ -15,186 +15,206 @@ type File struct {
 	ScrollY    int
 }
 
-func (this *File) AdjustScroll(viewModel *ViewModel) {
+func (file *File) AdjustScroll(viewModel *ViewModel) {
 	// adjust horizontal scroll
-	line := this.GetCurrentLine()
-	if line.Cursor-this.ScrollX < 0 {
+	line := file.GetCurrentLine()
+	if line.Cursor-file.ScrollX < 0 {
 		if config.DEBUG {
 			log.Println("scrolling left")
 		}
-		this.ScrollX = line.Cursor
-	} else if line.Cursor-this.ScrollX >= viewModel.GetMaxDisplayCols() {
+		file.ScrollX = line.Cursor
+	} else if line.Cursor-file.ScrollX >= viewModel.GetMaxDisplayCols() {
 		if config.DEBUG {
 			log.Println("scrolling right")
 		}
-		this.ScrollX = line.Cursor - viewModel.GetMaxDisplayCols() + 1
+		file.ScrollX = line.Cursor - viewModel.GetMaxDisplayCols() + 1
 	}
 
 	// adjust vertical scroll
-	if this.CursorLine-this.ScrollY < 0 {
+	if file.CursorLine-file.ScrollY < 0 {
 		if config.DEBUG {
 			log.Println("scrolling up")
 		}
-		this.ScrollY = this.CursorLine
-	} else if this.CursorLine-this.ScrollY >= viewModel.GetMaxDisplayLines() {
+		file.ScrollY = file.CursorLine
+	} else if file.CursorLine-file.ScrollY >= viewModel.GetMaxDisplayLines() {
 		if config.DEBUG {
 			log.Println("scrolling down")
 		}
-		this.ScrollY = this.CursorLine - viewModel.GetMaxDisplayLines() + 1
+		file.ScrollY = file.CursorLine - viewModel.GetMaxDisplayLines() + 1
 	}
 }
 
 func NewFile(filename string) *File {
-	var this *File = new(File)
-	this.Name = filename
-	this.Modified = false
-	this.Readonly = false
-	this.Lines = make([]*Line, 0)
-	this.CursorLine = 0
-	this.ScrollX = 0
-	this.ScrollY = 0
-	return this
+	var file *File = new(File)
+	file.Name = filename
+	file.Modified = false
+	file.Readonly = false
+	file.Lines = make([]*Line, 0)
+	file.CursorLine = 0
+	file.ScrollX = 0
+	file.ScrollY = 0
+	return file
 }
 
-func (this *File) ReadFile() error {
-	lines, err := ReadFileUtil(this.Name)
+func (file *File) ReadFile() error {
+	lines, err := ReadFileUtil(file.Name)
 	if err != nil {
 		return err
 	}
 
-	this.Lines = make([]*Line, 0)
+	file.Lines = make([]*Line, 0)
 
 	for _, line := range lines {
-		this.Lines = append(this.Lines, NewLine1(line))
+		file.Lines = append(file.Lines, NewLine1(line))
 	}
 
-	this.Modified = false
+	file.Modified = false
 	return nil
 }
 
-func (this *File) WriteFile() error {
-	if this.Readonly {
+func (file *File) WriteFile() error {
+	if file.Readonly {
 		return ErrorFileNotModifiable()
 	}
 
 	raw_lines := make([]string, 0)
-	for _, line := range this.Lines {
+	for _, line := range file.Lines {
 		raw_lines = append(raw_lines, string(line.Text))
 	}
 
-	err := WriteFileUtil(this.Name, raw_lines)
+	err := WriteFileUtil(file.Name, raw_lines)
 	if err != nil {
 		return err
 	}
 
-	this.Modified = true
+	file.Modified = true
 	return nil
 }
 
-func (this *File) InsertLineAboveCursor() {
+func (file *File) InsertLineAboveCursor() {
 	newLines := make([]*Line, 0)
-	newLines = append(newLines, this.Lines[:this.CursorLine]...)
+	newLines = append(newLines, file.Lines[:file.CursorLine]...)
 	newLines = append(newLines, NewLine())
-	newLines = append(newLines, this.Lines[this.CursorLine:]...)
-	this.CursorLine += 1
-	this.Lines = newLines
-	this.Modified = true
+	newLines = append(newLines, file.Lines[file.CursorLine:]...)
+	file.CursorLine += 1
+	file.Lines = newLines
+	file.Modified = true
 }
 
-func (this *File) InsertLineBelowCursor() {
+func (file *File) InsertLineBelowCursor() {
+	if file.CursorLine == len(file.Lines)-1 {
+		file.Lines = append(file.Lines, NewLine())
+	} else {
+		file.CursorLine += 1
+		file.InsertLineAboveCursor()
+		file.CursorLine -= 2
+	}
+	file.Modified = true
+}
+
+// delete line at cursor
+func (file *File) DeleteLine() {
+	if len(file.Lines) == 0 {
+		return
+	}
+
 	newLines := make([]*Line, 0)
-	newLines = append(newLines, this.Lines[:this.CursorLine+1]...)
-	newLines = append(newLines, NewLine())
-	newLines = append(newLines, this.Lines[this.CursorLine+1:]...)
-	this.Lines = newLines
-	this.Modified = true
-}
+	newLines = append(newLines, file.Lines[:file.CursorLine]...)
 
-func (this *File) DeleteLine() {
-	newLines := make([]*Line, 0)
-	newLines = append(newLines, this.Lines[:this.CursorLine]...)
-	newLines = append(newLines, this.Lines[this.CursorLine+1:]...)
-	this.Lines = newLines
-	this.Modified = true
-}
-
-func (this *File) GetCurrentLine() *Line {
-	return this.Lines[this.CursorLine]
-}
-
-func (this *File) MoveDown() {
-	if this.CursorLine+1 >= len(this.Lines) {
-		return
-	}
-	prevCursorX := this.GetCurrentLine().Cursor
-	this.CursorLine += 1
-	this.GetCurrentLine().SetCursor(min(prevCursorX, this.GetCurrentLine().Size()-1))
-}
-
-func (this *File) MoveUp() {
-	if this.CursorLine-1 < 0 {
-		return
-	}
-	prevCursorX := this.GetCurrentLine().Cursor
-	this.CursorLine -= 1
-	this.GetCurrentLine().SetCursor(min(prevCursorX, this.GetCurrentLine().Size()-1))
-}
-
-func (this *File) MoveForward() {
-	this.GetCurrentLine().MoveForward()
-}
-
-func (this *File) MoveBackward() {
-	this.GetCurrentLine().MoveBackward()
-}
-
-func (this *File) Insert(r rune) {
-	this.GetCurrentLine().Insert(r)
-}
-
-func (this *File) GetXCursor() int {
-	return this.GetCurrentLine().Cursor
-}
-
-func (this *File) SetXCursor(value int) {
-	if value < 0 || value >= this.GetCurrentLine().Cursor {
-		return
+	if file.CursorLine+1 < len(file.Lines) {
+		newLines = append(newLines, file.Lines[file.CursorLine+1:]...)
 	}
 
-	prevCursorX := this.GetCurrentLine().Cursor
+	file.Lines = newLines
+
+	if file.CursorLine > 0 && file.CursorLine == len(file.Lines)-1 {
+		file.CursorLine -= 1
+	}
+
+	file.Modified = true
+}
+
+func (file *File) GetCurrentLine() *Line {
+	if file.CursorLine < 0 || file.CursorLine >= len(file.Lines) {
+		log.Println("no lines in file")
+		return nil
+	}
+	return file.Lines[file.CursorLine]
+}
+
+func (file *File) MoveDown() {
+	if file.CursorLine+1 >= len(file.Lines) {
+		return
+	}
+	prevCursorX := file.GetCurrentLine().Cursor
+	file.CursorLine += 1
+	file.GetCurrentLine().SetCursor(min(prevCursorX, file.GetCurrentLine().Size()-1))
+}
+
+func (file *File) MoveUp() {
+	if file.CursorLine-1 < 0 {
+		return
+	}
+	prevCursorX := file.GetCurrentLine().Cursor
+	file.CursorLine -= 1
+	file.GetCurrentLine().SetCursor(min(prevCursorX, file.GetCurrentLine().Size()-1))
+}
+
+func (file *File) MoveForward() {
+	file.GetCurrentLine().MoveForward()
+}
+
+func (file *File) MoveBackward() {
+	file.GetCurrentLine().MoveBackward()
+}
+
+func (file *File) Insert(r rune) {
+	file.GetCurrentLine().Insert(r)
+}
+
+func (file *File) GetXCursor() int {
+	return file.GetCurrentLine().Cursor
+}
+
+func (file *File) SetXCursor(value int) {
+	if value < 0 || value >= file.GetCurrentLine().Cursor {
+		return
+	}
+
+	prevCursorX := file.GetCurrentLine().Cursor
 	if value == prevCursorX { // noop
 		return
 	}
 
-	this.GetCurrentLine().Cursor = value
+	file.GetCurrentLine().Cursor = value
 }
 
-func (this *File) SetYCursor(value int) {
-	if value < 0 || value >= this.CountLines() {
+func (file *File) SetYCursor(value int) {
+	if value < 0 || value >= file.CountLines() {
 		return
 	}
 
-	prevCursorY := this.CursorLine
+	prevCursorY := file.CursorLine
 	if value == prevCursorY { // noop
 		return
 	}
 
-	this.CursorLine = value
+	file.CursorLine = value
 }
 
-func (this *File) CountLines() int {
-	return len(this.Lines)
+func (file *File) CountLines() int {
+	return len(file.Lines)
 }
 
-func (this *File) JumpToNextChar(c rune) {
-	this.GetCurrentLine().JumpToNextChar(c)
+func (file *File) JumpToNextChar(c rune) {
+	file.GetCurrentLine().JumpToNextChar(c)
 }
 
-// func (this *File) Paste(text string) {
+// func (file *File) Paste(text string) {
 // 	if len(text) == 0 {
 // 		return
 // 	}
-// 	this.Modified = true
+// 	file.Modified = true
 
 // 	insertLinesRaw := strings.Split(text, "\n")
 // 	insertLines := make([]Line, 0)
@@ -203,27 +223,27 @@ func (this *File) JumpToNextChar(c rune) {
 // 	}
 // 	if len(insertLines) == 1 {
 // 		var newLine bytes.Buffer
-// 		newLine.WriteString(this.Lines[this.CursorLine].Text[:this.CursorX])
+// 		newLine.WriteString(file.Lines[file.CursorLine].Text[:file.CursorX])
 // 		newLine.WriteString(insertLines[0].Text)
-// 		newLine.WriteString(this.Lines[this.CursorLine].Text[this.CursorX:])
-// 		this.Lines[this.CursorLine].Text = newLine.String()
+// 		newLine.WriteString(file.Lines[file.CursorLine].Text[file.CursorX:])
+// 		file.Lines[file.CursorLine].Text = newLine.String()
 // 		return
 // 	}
 
 // 	var newLine bytes.Buffer
-// 	newLine.WriteString(this.Lines[this.CursorLine].Text[:this.CursorX])
+// 	newLine.WriteString(file.Lines[file.CursorLine].Text[:file.CursorX])
 // 	newLine.WriteString(insertLines[0].Text)
-// 	this.Lines[this.CursorLine].Text = newLine.String()
+// 	file.Lines[file.CursorLine].Text = newLine.String()
 
-// 	brokenLinePart := this.Lines[this.CursorLine].Text[this.CursorX:]
+// 	brokenLinePart := file.Lines[file.CursorLine].Text[file.CursorX:]
 // 	remainingLines := make([]Line, 0)
 // 	remainingLines = append(remainingLines, Line{Text: brokenLinePart})
 // 	remainingLines = append(remainingLines, insertLines[1:]...)
 
 // 	newLines := make([]Line, 0)
-// 	newLines = append(newLines, this.Lines[:this.CursorLine]...)
+// 	newLines = append(newLines, file.Lines[:file.CursorLine]...)
 // 	newLines = append(newLines, remainingLines...)
-// 	newLines = append(newLines, this.Lines[this.CursorLine+1:]...)
+// 	newLines = append(newLines, file.Lines[file.CursorLine+1:]...)
 
-// 	this.Lines = newLines
+// 	file.Lines = newLines
 // }
