@@ -10,17 +10,6 @@ const INSERT_MODE int = 1
 const COMMAND_MODE int = 2
 const NORMAL_MODE_ARG_PENDING = 3
 
-const DEFAULT_STATUS_LINE string = "Press CTRL+C to exit"
-
-func (app *Application) OpenTempFile() {
-	f, err := os.CreateTemp("", "unnamed")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	app.AddFile(f.Name())
-}
-
 type Application struct {
 	QuitSignal  bool
 	Files       []*File
@@ -35,9 +24,27 @@ func NewApplication() *Application {
 	app.QuitSignal = false
 	app.Files = make([]*File, 0)
 	app.CurrentFile = nil
-	app.StatusLine = DEFAULT_STATUS_LINE
+	app.StatusLine = ""
 	app.Mode = NORMAL_MODE
 	return app
+}
+
+func (app *Application) OpenTempFile() {
+	f, err := os.CreateTemp("", "unnamed")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	app.AddFile(f.Name())
+}
+
+func (app *Application) GetCurrentFileIndex() int {
+	for i, file := range app.Files {
+		if file == app.CurrentFile {
+			return i
+		}
+	}
+	return -1
 }
 
 // Create new file and make it current

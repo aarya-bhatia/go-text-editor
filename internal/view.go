@@ -143,8 +143,15 @@ func (view *ViewModel) renderStatus(editor *Application) {
 		}
 	}
 
-	status := fmt.Sprintf("[%s] | %s | Ln %d, Col %d", getModeName(editor.Mode), filename,
-		editor.CurrentFile.CursorLine, editor.CurrentFile.GetCurrentLine().Cursor)
+	mode := getModeName(editor.Mode)
+
+	status := fmt.Sprintf("[%s] | %s | Ln %d, Col %d | file %d of %d",
+		mode,
+		filename,
+		editor.CurrentFile.CursorLine,
+		editor.CurrentFile.GetCurrentLine().Cursor,
+		editor.GetCurrentFileIndex()+1,
+		len(editor.Files))
 
 	line := []rune(status)
 
@@ -155,6 +162,15 @@ func (view *ViewModel) renderStatus(editor *Application) {
 
 func (view *ViewModel) renderCursor(x int, y int) {
 	view.Screen.ShowCursor(x, y)
+}
+
+func (view *ViewModel) renderCommandPrompt(command string) {
+	commandBoxWidth := view.EditorBoxWidth / 2
+	commandBoxHeight := 10 // TODO: make this dynamic
+	commandBoxLeft := view.EditorBoxLeft + (view.EditorBoxWidth/2 - commandBoxWidth/2)
+	commandBoxTop := view.EditorBoxTop + (view.EditorBoxHeight/2 - commandBoxHeight/2)
+
+	DrawBox(view.Screen, commandBoxLeft, commandBoxTop, commandBoxLeft+commandBoxWidth, commandBoxTop+commandBoxHeight, tcell.StyleDefault, []rune(command))
 }
 
 func (view *ViewModel) render(editor *Application) {
@@ -175,9 +191,9 @@ func (view *ViewModel) render(editor *Application) {
 		view.renderCursor(view.EditorBoxLeft+1, view.EditorBoxTop+1)
 	}
 
-	view.Screen.Show()
-	if editor.StatusLine != "" {
-		// TODO: view.Screen.ShowMessage(editor.StatusLine)
-		log.Println("NOTICE:", editor.StatusLine)
+	if editor.Mode == COMMAND_MODE {
+		view.renderCommandPrompt("λ " + userCommand)
 	}
+
+	view.Screen.Show()
 }

@@ -38,6 +38,8 @@ go run . [<filename1> [<filename2>...] ]
 - DONE open and edit multiple files
 - DONE insert utf8 text
 - DONE auto-scroll when jumping cursor goes off-screen
+
+- TODO show line numbers
 - TODO dynamic size for boxes
 - TODO fix ui window sizes 
 - TODO make separate status line and command line windows
@@ -51,4 +53,6 @@ go run . [<filename1> [<filename2>...] ]
 - TODO add visual mode
 - TODO impl popup to show longer info messages to user
 - TODO open temporary file for empty buffer
-
+- TODO how to show message on screen?
+- TODO move user command string into App struct
+- TODO keep user command history and show in prompt?
