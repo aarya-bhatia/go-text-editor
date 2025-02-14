@@ -24,19 +24,18 @@ type ViewModel struct {
 func NewViewModel(screen tcell.Screen) *ViewModel {
 	width, height := screen.Size()
 
-	const gapX = 2
-	const gapY = 2
-
 	viewModel := new(ViewModel)
 	viewModel.Screen = screen
-	viewModel.StatusBoxHeight = 2
-	viewModel.EditorBoxTop = gapY
-	viewModel.EditorBoxLeft = gapX
-	viewModel.EditorBoxWidth = width - 2*gapX
-	viewModel.EditorBoxHeight = height - 3*gapY - viewModel.StatusBoxHeight
-	viewModel.StatusBoxTop = viewModel.EditorBoxHeight + 2*gapY
-	viewModel.StatusBoxLeft = gapX
-	viewModel.StatusBoxWidth = width - 2*gapX
+
+	viewModel.EditorBoxTop = 0
+	viewModel.EditorBoxLeft = 0
+	viewModel.EditorBoxWidth = width - 1
+	viewModel.EditorBoxHeight = height - 2
+
+	viewModel.StatusBoxTop = viewModel.EditorBoxHeight + 1
+	viewModel.StatusBoxLeft = 0
+	viewModel.StatusBoxWidth = width
+	viewModel.StatusBoxHeight = 4
 
 	return viewModel
 }
@@ -135,14 +134,23 @@ func (view *ViewModel) renderEditorBox(text []rune) {
 		view.EditorBoxTop+view.EditorBoxHeight, tcell.StyleDefault, text)
 }
 
-func (view *ViewModel) renderStatusBox(text []rune) {
-	DrawBox(view.Screen, view.StatusBoxLeft,
-		view.StatusBoxTop, view.StatusBoxLeft+view.StatusBoxWidth,
-		view.StatusBoxTop+view.StatusBoxHeight, tcell.StyleDefault, text)
-}
+func (view *ViewModel) renderStatus(editor *Application) {
+	filename := "No File"
+	if editor.CurrentFile != nil {
+		filename = editor.CurrentFile.Name
+		if editor.CurrentFile.Modified {
+			filename += " [+]"
+		}
+	}
 
-func getStatusLine(editor *Application) string {
-	return fmt.Sprintf("[%s] %s", getModeName(editor.Mode), editor.StatusLine)
+	status := fmt.Sprintf("[%s] | %s | Ln %d, Col %d", getModeName(editor.Mode), filename,
+		editor.CurrentFile.CursorLine, editor.CurrentFile.GetCurrentLine().Cursor)
+
+	line := []rune(status)
+
+	DrawText(view.Screen, view.StatusBoxLeft, view.StatusBoxTop,
+		view.StatusBoxLeft+view.StatusBoxWidth,
+		view.StatusBoxTop+view.StatusBoxHeight, tcell.StyleDefault, line)
 }
 
 func (view *ViewModel) renderCursor(x int, y int) {
@@ -156,17 +164,20 @@ func (view *ViewModel) render(editor *Application) {
 		editor.CurrentFile.AdjustScroll(view)
 		view.displayFile(editor.CurrentFile)
 
-		view.renderStatusBox([]rune(getStatusLine(editor)))
+		view.renderStatus(editor)
 
 		cursorX, cursorY := view.getDisplayCursor(editor.CurrentFile)
 		view.renderCursor(cursorX, cursorY)
 
 	} else {
 		view.renderEditorBox([]rune{})
-		view.renderStatusBox([]rune{})
-		view.renderStatusBox([]rune(getStatusLine(editor)))
+		view.renderStatus(editor)
 		view.renderCursor(view.EditorBoxLeft+1, view.EditorBoxTop+1)
 	}
 
 	view.Screen.Show()
+	if editor.StatusLine != "" {
+		// TODO: view.Screen.ShowMessage(editor.StatusLine)
+		log.Println("NOTICE:", editor.StatusLine)
+	}
 }
