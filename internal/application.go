@@ -1,11 +1,25 @@
 package internal
 
-import "log"
+import (
+	"log"
+	"os"
+)
 
 const NORMAL_MODE int = 0
 const INSERT_MODE int = 1
 const COMMAND_MODE int = 2
 const NORMAL_MODE_ARG_PENDING = 3
+
+const DEFAULT_STATUS_LINE string = "Press CTRL+C to exit"
+
+func (app *Application) OpenTempFile() {
+	f, err := os.CreateTemp("", "unnamed")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	app.AddFile(f.Name())
+}
 
 type Application struct {
 	QuitSignal  bool
@@ -21,7 +35,7 @@ func NewApplication() *Application {
 	app.QuitSignal = false
 	app.Files = make([]*File, 0)
 	app.CurrentFile = nil
-	app.StatusLine = "Press CTRL+C to exit"
+	app.StatusLine = DEFAULT_STATUS_LINE
 	app.Mode = NORMAL_MODE
 	return app
 }

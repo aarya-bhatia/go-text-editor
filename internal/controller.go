@@ -40,7 +40,13 @@ func Start(fileNames []string) {
 	viewModel := NewViewModel(screen)
 
 	app := NewApplication()
-	app.OpenAll(fileNames)
+
+	if len(fileNames) == 0 {
+		app.OpenTempFile()
+	} else {
+		app.OpenAll(fileNames)
+	}
+
 	defer app.CloseAll()
 
 	// Event loop
