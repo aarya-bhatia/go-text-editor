@@ -9,9 +9,9 @@ import (
 )
 
 func handleKeyEvent(event *tcell.EventKey, editor *model.Application, screen tcell.Screen) {
-	// if config.DEBUG {
-	// 	log.Println("Got key", event.Name())
-	// }
+	if config.DEBUG {
+		log.Println("Got key", event.Name())
+	}
 
 	if event.Key() == tcell.KeyCtrlC {
 		log.Println("Setting quit signal")
@@ -91,6 +91,16 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *model.Application) {
 	case 'f':
 		if editor.CurrentFile != nil {
 			editor.Mode = model.NORMAL_MODE_ARG_PENDING
+		}
+
+	case 'G':
+		if editor.CurrentFile != nil && editor.CurrentFile.CountLines() > 0 {
+			editor.CurrentFile.CursorLine = editor.CurrentFile.CountLines() - 1
+		}
+
+	case 'g':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.CursorLine = 0
 		}
 	}
 }
