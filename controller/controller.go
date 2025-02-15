@@ -93,6 +93,9 @@ func Start(fileNames []string) {
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			screen.Sync()
+			nCols, nRows = screen.Size()
+			viewBuffer = view.NewViewBuffer(0, 0, nCols, nRows)
+			viewBuffer.Add(view.NewViewBuffer(0, 0, nCols, nRows-2).AddBorder())
 		case *tcell.EventKey:
 			handleKeyEvent(ev, app, screen)
 		case *tcell.EventMouse:
