@@ -43,7 +43,6 @@ go run . [<filename1> [<filename2>...] ]
 
 - TODO show line numbers
 - TODO make separate status line and command line windows
-- TODO handle screen refresh
 - TODO unit tests
 - TODO insert mode - append, CTRL+keys
 - TODO insert new lines with enter
