@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-editor/internal"
+	"go-editor/controller"
 	"log"
 	"os"
 )
@@ -19,5 +19,5 @@ func main() {
 	filenames := os.Args[1:]
 
 	// Run application
-	internal.Start(filenames)
+	controller.Start(filenames)
 }

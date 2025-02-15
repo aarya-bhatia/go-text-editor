@@ -1,4 +1,4 @@
-package internal
+package model
 
 import (
 	"log"
@@ -16,6 +16,7 @@ type Application struct {
 	CurrentFile *File
 	StatusLine  string
 	Mode        int
+	UserCommand string
 }
 
 // Returns new application instance
@@ -26,6 +27,7 @@ func NewApplication() *Application {
 	app.CurrentFile = nil
 	app.StatusLine = ""
 	app.Mode = NORMAL_MODE
+  app.UserCommand = ""
 	return app
 }
 

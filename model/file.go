@@ -1,7 +1,9 @@
-package internal
+package model
 
 import (
+	"errors"
 	"go-editor/config"
+	"go-editor/utils"
 	"log"
 )
 
@@ -15,7 +17,7 @@ type File struct {
 	ScrollY    int
 }
 
-func (file *File) AdjustScroll(viewModel *ViewModel) {
+func (file *File) AdjustScroll(nRows int, nCols int) {
 	// adjust horizontal scroll
 	line := file.GetCurrentLine()
 	if line.Cursor-file.ScrollX < 0 {
@@ -23,11 +25,11 @@ func (file *File) AdjustScroll(viewModel *ViewModel) {
 			log.Println("scrolling left")
 		}
 		file.ScrollX = line.Cursor
-	} else if line.Cursor-file.ScrollX >= viewModel.GetMaxDisplayCols() {
+	} else if line.Cursor-file.ScrollX >= nCols {
 		if config.DEBUG {
 			log.Println("scrolling right")
 		}
-		file.ScrollX = line.Cursor - viewModel.GetMaxDisplayCols() + 1
+		file.ScrollX = line.Cursor - nCols + 1
 	}
 
 	// adjust vertical scroll
@@ -36,11 +38,11 @@ func (file *File) AdjustScroll(viewModel *ViewModel) {
 			log.Println("scrolling up")
 		}
 		file.ScrollY = file.CursorLine
-	} else if file.CursorLine-file.ScrollY >= viewModel.GetMaxDisplayLines() {
+	} else if file.CursorLine-file.ScrollY >= nRows {
 		if config.DEBUG {
 			log.Println("scrolling down")
 		}
-		file.ScrollY = file.CursorLine - viewModel.GetMaxDisplayLines() + 1
+		file.ScrollY = file.CursorLine - nRows + 1
 	}
 }
 
@@ -57,7 +59,7 @@ func NewFile(filename string) *File {
 }
 
 func (file *File) ReadFile() error {
-	lines, err := ReadFileUtil(file.Name)
+	lines, err := utils.ReadFileUtil(file.Name)
 	if err != nil {
 		return err
 	}
@@ -74,7 +76,7 @@ func (file *File) ReadFile() error {
 
 func (file *File) WriteFile() error {
 	if file.Readonly {
-		return ErrorFileNotModifiable()
+		return errors.New("file is readonly")
 	}
 
 	raw_lines := make([]string, 0)
@@ -82,7 +84,7 @@ func (file *File) WriteFile() error {
 		raw_lines = append(raw_lines, string(line.Text))
 	}
 
-	err := WriteFileUtil(file.Name, raw_lines)
+	err := utils.WriteFileUtil(file.Name, raw_lines)
 	if err != nil {
 		return err
 	}

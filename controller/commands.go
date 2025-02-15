@@ -1,16 +1,17 @@
-package internal
+package controller
 
 import (
 	"errors"
+	"go-editor/model"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
-func handleUserCommand(app *Application) {
-	userCommand = strings.TrimSpace(userCommand)
-	args := strings.Split(userCommand, " ")
+func handleUserCommand(app *model.Application) {
+	app.UserCommand = strings.TrimSpace(app.UserCommand)
+	args := strings.Split(app.UserCommand, " ")
 
 	switch args[0] {
 	case "q", "quit", "exit":

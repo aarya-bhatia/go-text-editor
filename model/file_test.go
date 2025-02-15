@@ -1,10 +1,11 @@
-package internal
+package model
 
 import (
 	"log"
 	"os"
 	"strings"
 	"testing"
+  "go-editor/utils"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -53,7 +54,7 @@ func TestFile_ReadFile(t *testing.T) {
 	tearDown := setupTest(t)
 	defer tearDown(t)
 
-	assert.Nil(t, os.WriteFile(testFile.Name, []byte("Hello"), DEFAULT_FILE_PERMISSIONS))
+	assert.Nil(t, os.WriteFile(testFile.Name, []byte("Hello"), utils.DEFAULT_FILE_PERMISSIONS))
 	assert.Nil(t, testFile.ReadFile())
 }
 
