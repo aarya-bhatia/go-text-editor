@@ -85,11 +85,9 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *model.Application) {
 		}
 	case ':':
 		editor.Mode = model.COMMAND_MODE
-		editor.StatusLine = ""
 		editor.UserCommand = ""
 	case 'i':
 		editor.Mode = model.INSERT_MODE
-		editor.StatusLine = ""
 	case 'f':
 		if editor.CurrentFile != nil {
 			editor.Mode = model.NORMAL_MODE_ARG_PENDING
@@ -102,11 +100,13 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *model.Application) {
 		editor.Mode = model.NORMAL_MODE
 		handleUserCommand(editor)
 	} else if event.Key() == tcell.KeyBS || event.Key() == tcell.KeyBackspace2 {
-		editor.UserCommand = editor.UserCommand[:len(editor.UserCommand)-1]
-		editor.StatusLine = editor.UserCommand
+		if len(editor.UserCommand) > 0 {
+			editor.UserCommand = editor.UserCommand[:len(editor.UserCommand)-1]
+		} else {
+			editor.Mode = model.NORMAL_MODE
+		}
 	} else if event.Rune() != 0 {
 		editor.UserCommand += string(event.Rune())
-		editor.StatusLine = editor.UserCommand
 	}
 }
 

@@ -52,16 +52,24 @@ func Start(fileNames []string) {
 
 	nCols, nRows := screen.Size()
 	viewBuffer := view.NewViewBuffer(0, 0, nCols, nRows)
-	viewBuffer.Add(view.NewViewBuffer(0, 0, nCols, nRows-1).AddBorder())
+	viewBuffer.Add(view.NewViewBuffer(0, 0, nCols, nRows-2).AddBorder())
 
 	// Event loop
 	for !app.QuitSignal {
 		// Add status
-		statusView := view.NewViewBuffer(0, nRows-1, nCols, 1)
+		statusView := view.NewViewBuffer(0, nRows-2, nCols, 1)
 		statusView.AddText([][]rune{app.GetStatusLine()})
 		viewBuffer.Add(statusView)
 
-		editorView := view.NewViewBuffer(1, 1, nCols-2, nRows-3)
+		commandView := view.NewViewBuffer(0, nRows-1, nCols, 1)
+		if app.Mode == model.COMMAND_MODE {
+			commandView.AddText([][]rune{[]rune(":" + app.UserCommand)})
+		} else {
+			commandView.AddText([][]rune{[]rune(app.StatusLine)})
+		}
+		viewBuffer.Add(commandView)
+
+		editorView := view.NewViewBuffer(1, 1, nCols-2, nRows-4)
 
 		if app.CurrentFile != nil {
 			app.CurrentFile.AdjustScroll(editorView.Height, editorView.Width)
