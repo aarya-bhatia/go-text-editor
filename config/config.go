@@ -1,3 +1,3 @@
 package config
 
-const DEBUG=false
+const DEBUG = false

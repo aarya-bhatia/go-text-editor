@@ -169,9 +169,22 @@ func (line *Line) Append(r rune) {
 }
 
 func (line *Line) JumpToNextChar(c rune) {
-	for i := line.Cursor; i < line.Size(); i++ {
+	for i := line.Cursor + 1; i < line.Size(); i++ {
 		if line.Text[i] == c {
 			line.Cursor = i
+			break
 		}
 	}
+}
+
+func (line *Line) GetVisibleText(nCols int, scrollX int) []rune {
+	if scrollX >= len(line.Text) {
+		return []rune{}
+	}
+
+	if scrollX+nCols >= len(line.Text) {
+		return line.Text[scrollX:]
+	}
+
+	return line.Text[scrollX : scrollX+nCols]
 }

@@ -9,11 +9,36 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-func Start(fileNames []string) {
-	screen, quit := view.NewScreen()
-	defer quit()
+func NewScreen() (tcell.Screen, func()) {
+	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 
-	viewModel := view.NewViewModel(screen)
+	s, err := tcell.NewScreen()
+	if err != nil {
+		log.Fatalf("%+v", err)
+	}
+	if err := s.Init(); err != nil {
+		log.Fatalf("%+v", err)
+	}
+	s.SetStyle(defStyle)
+	s.Clear()
+
+	quit := func() {
+		// You have to catch panics in a defer, clean up, and
+		// re-raise them - otherwise your application can
+		// die without leaving any diagnostic trace.
+		maybePanic := recover()
+		s.Fini()
+		if maybePanic != nil {
+			panic(maybePanic)
+		}
+	}
+
+	return s, quit
+}
+
+func Start(fileNames []string) {
+	screen, quit := NewScreen()
+	defer quit()
 
 	app := model.NewApplication()
 
@@ -25,10 +50,33 @@ func Start(fileNames []string) {
 
 	defer app.CloseAll()
 
+	nCols, nRows := screen.Size()
+	viewBuffer := view.NewViewBuffer(0, 0, nCols, nRows)
+	viewBuffer.Add(view.NewViewBuffer(0, 0, nCols, nRows-1).AddBorder())
+
 	// Event loop
 	for !app.QuitSignal {
-		// Update screen
-		viewModel.Render(app)
+		// Add status
+		statusView := view.NewViewBuffer(0, nRows-1, nCols, 1)
+		statusView.AddText([][]rune{app.GetStatusLine()})
+		viewBuffer.Add(statusView)
+
+		editorView := view.NewViewBuffer(1, 1, nCols-2, nRows-3)
+
+		if app.CurrentFile != nil {
+			app.CurrentFile.AdjustScroll(editorView.Height, editorView.Width)
+
+			editorView.AddText(app.CurrentFile.GetVisibleText(nRows, nCols))
+			viewBuffer.Add(editorView)
+
+			cursorX, cursorY := app.CurrentFile.GetCursor()
+			screen.ShowCursor(editorView.TopX+cursorX, editorView.TopY+cursorY)
+		} else {
+			screen.ShowCursor(editorView.TopX, editorView.TopY)
+		}
+
+		// Update screen content
+		viewBuffer.Render(screen, tcell.StyleDefault)
 
 		// Poll event
 		ev := screen.PollEvent()

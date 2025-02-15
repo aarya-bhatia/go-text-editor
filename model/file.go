@@ -17,6 +17,40 @@ type File struct {
 	ScrollY    int
 }
 
+func (file *File) GetVisibleText(nRows int, nCols int) [][]rune {
+	lines := make([][]rune, 0)
+	for i := file.ScrollY; i < file.ScrollY+nRows && i < len(file.Lines); i++ {
+		lines = append(lines, file.Lines[i].GetVisibleText(nCols, file.ScrollX))
+	}
+	return lines
+}
+
+func (file *File) GetCursor() (cursorX int, cursorY int) {
+	cursorX = 0
+	cursorY = 0
+
+	if file == nil {
+		return
+	}
+
+	utils.Assert(file.GetCurrentLine() != nil)
+
+	cursorX = file.GetCurrentLine().Cursor - file.ScrollX
+	cursorY = file.CursorLine - file.ScrollY
+
+	if cursorY < 0 {
+		log.Print("WARN: cursor out of bounds")
+		cursorY = 0
+	}
+
+	if cursorX < 0 {
+		log.Print("WARN: cursor out of bounds")
+		cursorX = 0
+	}
+
+	return
+}
+
 func (file *File) AdjustScroll(nRows int, nCols int) {
 	// adjust horizontal scroll
 	line := file.GetCurrentLine()

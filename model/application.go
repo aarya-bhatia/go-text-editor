@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -27,8 +28,19 @@ func NewApplication() *Application {
 	app.CurrentFile = nil
 	app.StatusLine = ""
 	app.Mode = NORMAL_MODE
-  app.UserCommand = ""
+	app.UserCommand = ""
 	return app
+}
+
+func (app *Application) getModeName() string {
+	switch app.Mode {
+	case COMMAND_MODE:
+		return "COMMAND"
+	case INSERT_MODE:
+		return "INSERT"
+	default:
+		return "NORMAL"
+	}
 }
 
 func (app *Application) OpenTempFile() {
@@ -195,4 +207,30 @@ func (app *Application) GotoLine(lineNo int) {
 		app.CurrentFile.SetYCursor(lineNo)
 		return
 	}
+}
+
+func (app *Application) GetStatusLine() []rune {
+	filename := "No File"
+	if app.CurrentFile != nil {
+		filename = app.CurrentFile.Name
+		if app.CurrentFile.Modified {
+			filename += " [+]"
+		}
+	}
+
+	mode := app.getModeName()
+
+	status := fmt.Sprintf("[%s] | %s | Ln %d, Col %d | file %d of %d",
+		mode,
+		filename,
+		app.CurrentFile.CursorLine,
+		app.CurrentFile.GetCurrentLine().Cursor,
+		app.GetCurrentFileIndex()+1,
+		len(app.Files))
+
+	// if config.DEBUG {
+	// 	log.Println(status)
+	// }
+
+	return []rune(status)
 }

@@ -9,9 +9,9 @@ import (
 )
 
 func handleKeyEvent(event *tcell.EventKey, editor *model.Application, screen tcell.Screen) {
-	if config.DEBUG {
-		log.Println("Got key", event.Name())
-	}
+	// if config.DEBUG {
+	// 	log.Println("Got key", event.Name())
+	// }
 
 	if event.Key() == tcell.KeyCtrlC {
 		log.Println("Setting quit signal")
@@ -111,18 +111,18 @@ func handleKeyInCommandMode(event *tcell.EventKey, editor *model.Application) {
 }
 
 func handleKeyInInsertMode(event *tcell.EventKey, editor *model.Application) {
-  if event.Key() == tcell.KeyEscape {
-    editor.Mode = model.NORMAL_MODE
+	if event.Key() == tcell.KeyEscape {
+		editor.Mode = model.NORMAL_MODE
 	} else if event.Key() == tcell.KeyBS || event.Key() == tcell.KeyBackspace2 {
-    if editor.CurrentFile.GetCurrentLine().Size() == 0 {
-      editor.CurrentFile.DeleteLine()
-      editor.CurrentFile.GetCurrentLine().MoveToEnd()
-    } else {
-      editor.CurrentFile.GetCurrentLine().RemoveChar()
-    }
-  } else if event.Key() == tcell.KeyEnter {
-    editor.CurrentFile.InsertLineBelowCursor()
-    editor.CurrentFile.CursorLine += 1
+		if editor.CurrentFile.GetCurrentLine().Size() == 0 {
+			editor.CurrentFile.DeleteLine()
+			editor.CurrentFile.GetCurrentLine().MoveToEnd()
+		} else {
+			editor.CurrentFile.GetCurrentLine().RemoveChar()
+		}
+	} else if event.Key() == tcell.KeyEnter {
+		editor.CurrentFile.InsertLineBelowCursor()
+		editor.CurrentFile.CursorLine += 1
 	} else if event.Rune() != 0 {
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.Insert(event.Rune())

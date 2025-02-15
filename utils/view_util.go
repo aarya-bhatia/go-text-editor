@@ -1,12 +1,8 @@
-package view
+package utils
 
 import (
 	"github.com/gdamore/tcell/v2"
 )
-
-func DrawLine(s tcell.Screen, topLeft int, topRight int, maxLength int, style tcell.Style, line []rune) {
-	DrawText(s, topLeft, topRight, topLeft+maxLength, topRight+1, style, line)
-}
 
 func DrawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text []rune) {
 	row := y1
