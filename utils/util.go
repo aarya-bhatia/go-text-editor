@@ -37,3 +37,41 @@ func GetStringMatrix(nRows int, nCols int, char rune) [][]rune {
 
 	return lines
 }
+
+func Map[T any, R any](elements []T, mapper func(element T) R) []R {
+	newElements := make([]R, len(elements))
+	for i, element := range elements {
+		newElements[i] = mapper(element)
+	}
+	return newElements
+}
+
+func Filter[T any](elements []T, filter func(element T) bool) []T {
+	newElements := make([]T, 0, len(elements)) // pre-allocate max capacity
+	for i, element := range elements {
+		if filter(elements[i]) {
+			newElements = append(newElements, element)
+		}
+	}
+	return newElements
+}
+
+func Find[T any](elements []T, predicate func(element T) bool) *T {
+	for i, element := range elements {
+		if predicate(element) {
+			return &elements[i] // return actual pointer not copy
+		}
+	}
+
+	return nil
+}
+
+func IndexOf[T comparable](elements []T, target T) int {
+	for i, element := range elements {
+		if element == target {
+			return i
+		}
+	}
+
+	return -1
+}
