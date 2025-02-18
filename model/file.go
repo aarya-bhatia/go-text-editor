@@ -2,9 +2,9 @@ package model
 
 import (
 	"errors"
-	"go-editor/config"
 	"go-editor/utils"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type File struct {
@@ -39,12 +39,12 @@ func (file *File) GetCursor() (cursorX int, cursorY int) {
 	cursorY = file.CursorLine - file.ScrollY
 
 	if cursorY < 0 {
-		log.Print("WARN: cursor out of bounds")
+		log.Warn("Cursor out of bounds")
 		cursorY = 0
 	}
 
 	if cursorX < 0 {
-		log.Print("WARN: cursor out of bounds")
+		log.Warn("Cursor out of bounds")
 		cursorX = 0
 	}
 
@@ -55,27 +55,19 @@ func (file *File) AdjustScroll(nRows int, nCols int) {
 	// adjust horizontal scroll
 	line := file.GetCurrentLine()
 	if line.Cursor-file.ScrollX < 0 {
-		if config.DEBUG {
-			log.Println("scrolling left")
-		}
+		log.Debug("scrolling left")
 		file.ScrollX = line.Cursor
 	} else if line.Cursor-file.ScrollX >= nCols {
-		if config.DEBUG {
-			log.Println("scrolling right")
-		}
+		log.Debug("scrolling right")
 		file.ScrollX = line.Cursor - nCols + 1
 	}
 
 	// adjust vertical scroll
 	if file.CursorLine-file.ScrollY < 0 {
-		if config.DEBUG {
-			log.Println("scrolling up")
-		}
+		log.Debug("scrolling up")
 		file.ScrollY = file.CursorLine
 	} else if file.CursorLine-file.ScrollY >= nRows {
-		if config.DEBUG {
-			log.Println("scrolling down")
-		}
+		log.Debug("scrolling down")
 		file.ScrollY = file.CursorLine - nRows + 1
 	}
 }
@@ -172,7 +164,7 @@ func (file *File) DeleteLine() {
 
 func (file *File) GetCurrentLine() *Line {
 	if file.CursorLine < 0 || file.CursorLine >= len(file.Lines) {
-		log.Println("no lines in file")
+		log.Warn("no lines in file")
 		return nil
 	}
 	return file.Lines[file.CursorLine]

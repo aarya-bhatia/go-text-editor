@@ -4,6 +4,8 @@ import (
 	"go-editor/controller"
 	"log"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -15,6 +17,8 @@ func main() {
 
 	// Redirect log output to the file
 	log.SetOutput(logFile)
+
+	logrus.SetLevel(logrus.InfoLevel)
 
 	filenames := os.Args[1:]
 

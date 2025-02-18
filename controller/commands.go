@@ -41,13 +41,13 @@ func handleUserCommand(app *model.Application) {
 		app.CloseFile()
 	case "closeall":
 		app.CloseAll()
-  case "ls":
-    if len(app.Files) == 0 {
-      log.Println("no files are open")
-    }
-    for _, file := range app.Files {
-      log.Println(file.Name)
-    }
+	case "ls":
+		if len(app.Files) == 0 {
+			log.Println("no files are open")
+		}
+		for _, file := range app.Files {
+			log.Println(file.Name)
+		}
 	default:
 		if len(args) == 1 {
 			userNumber, err := strconv.Atoi(args[0]) // check if its a numeral

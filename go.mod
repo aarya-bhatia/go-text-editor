@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/gdamore/tcell/v2 v2.7.4
+	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 )
 

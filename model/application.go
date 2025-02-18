@@ -2,8 +2,9 @@ package model
 
 import (
 	"fmt"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const NORMAL_MODE int = 0
@@ -71,7 +72,7 @@ func (app *Application) AddFile(filename string) error {
 
 	app.Files = append(app.Files, file)
 	app.CurrentFile = file
-	log.Println("new file added: ", filename)
+	log.Info("new file added: ", filename)
 
 	return nil
 }
@@ -91,7 +92,7 @@ func (app *Application) OpenFile(filename string) error {
 // Close current file and replace it with the next file in buffer list.
 func (app *Application) CloseFile() {
 	if app.CurrentFile == nil || len(app.Files) == 0 {
-		log.Println("buffer list is empty")
+		log.Debug("buffer list is empty")
 		return
 	}
 
@@ -149,7 +150,7 @@ func (app *Application) OpenNextFile() {
 		}
 	}
 
-	log.Println("No next file")
+	log.Debug("No next file")
 }
 
 // Open the previous file in buffer list
@@ -175,7 +176,7 @@ func (app *Application) OpenPrevFile() {
 		}
 	}
 
-	log.Println("No prev file")
+	log.Debug("No prev file")
 }
 
 func (app *Application) OpenAll(filenames []string) {
@@ -183,11 +184,11 @@ func (app *Application) OpenAll(filenames []string) {
 		file := NewFile(filename)
 
 		if err := file.ReadFile(); err != nil {
-			log.Println("WARN: Failed to open file:", filename)
+			log.Warnf("Failed to open file: %s", filename)
 			continue
 		}
 
-		log.Printf("Opened file '%s' with %d lines.", filename, file.CountLines())
+		log.Debugf("Opened file '%s' with %d lines.", filename, file.CountLines())
 		app.Files = append(app.Files, file)
 	}
 
@@ -197,13 +198,13 @@ func (app *Application) OpenAll(filenames []string) {
 }
 
 func (app *Application) Quit() {
-	log.Println("Setting quit signal")
+	log.Info("Setting quit signal")
 	app.QuitSignal = true
 }
 
 func (app *Application) GotoLine(lineNo int) {
 	if app.CurrentFile != nil {
-		log.Println("Move to line ", lineNo)
+		log.Debug("Move to line ", lineNo)
 		app.CurrentFile.SetYCursor(lineNo)
 		return
 	}
@@ -228,9 +229,7 @@ func (app *Application) GetStatusLine() []rune {
 		app.GetCurrentFileIndex()+1,
 		len(app.Files))
 
-	// if config.DEBUG {
-	// 	log.Println(status)
-	// }
+	log.Debug(status)
 
 	return []rune(status)
 }
