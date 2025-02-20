@@ -100,3 +100,17 @@ func TestUtil_Find(t *testing.T) {
 
 	assert.True(t, found == nil)
 }
+
+func TestUtil_ArrayRemove(t *testing.T) {
+	elements := []int{1, 2, 3}
+	newElements := ArrayRemove(elements, 1)
+	expected := []int{1, 3}
+	assert.True(t, reflect.DeepEqual(newElements, expected))
+}
+
+func TestUtil_RightAlign(t *testing.T) {
+	text := "12345"
+	assert.Equal(t, RightAlign(text, 6), " 12345")
+	assert.Equal(t, RightAlign(text, 4), "2345")
+	assert.Equal(t, RightAlign(text, 5), "12345")
+}

@@ -83,3 +83,6 @@ func (buf *ViewBuffer) AddText(lines [][]rune) *ViewBuffer {
 
 	return buf
 }
+
+func (buf *ViewBuffer) AddLineNumbers() {
+}

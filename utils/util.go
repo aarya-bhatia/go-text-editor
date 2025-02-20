@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"runtime"
+	"unicode/utf8"
 )
 
 func Assert(value bool, message ...interface{}) {
@@ -74,4 +76,30 @@ func IndexOf[T comparable](elements []T, target T) int {
 	}
 
 	return -1
+}
+
+func ArrayRemove[T any](slice []T, index int) []T {
+	newSlice := make([]T, 0, len(slice))
+	for i, element := range slice {
+		if i == index {
+			continue
+		}
+
+		newSlice = append(newSlice, element)
+	}
+	return newSlice
+}
+
+// RightAlign trims the left side if needed and right-aligns text within the given width.
+func RightAlign(text string, maxWidth int) string {
+	textLen := utf8.RuneCountInString(text)
+
+	if textLen > maxWidth {
+		// Clip leading characters to fit within maxWidth
+		runes := []rune(text)
+		return string(runes[textLen-maxWidth:])
+	}
+
+	// Pad with spaces to right-align
+	return fmt.Sprintf("%*s", maxWidth, text)
 }

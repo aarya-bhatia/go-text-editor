@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"go-editor/utils"
 	"os"
 	"strings"
 
@@ -112,11 +113,7 @@ func (app *Application) CloseFile() {
 				app.CurrentFile = app.Files[0]
 			}
 
-			newFiles := make([]*File, 0)
-			newFiles = append(newFiles, app.Files[:i]...)
-			newFiles = append(newFiles, app.Files[i+1:]...)
-
-			app.Files = newFiles
+			app.Files = utils.ArrayRemove(app.Files, i)
 			return
 		}
 	}
