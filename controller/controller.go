@@ -2,12 +2,18 @@ package controller
 
 import (
 	"log"
+	"strconv"
 
 	"go-editor/model"
 	"go-editor/view"
 
 	"github.com/gdamore/tcell/v2"
 )
+
+var editorWidth = 0
+var editorHeight = 0
+var editorTopX = 0
+var editorTopY = 0
 
 func NewScreen() (tcell.Screen, func()) {
 	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
@@ -36,6 +42,31 @@ func NewScreen() (tcell.Screen, func()) {
 	return s, quit
 }
 
+func setupBaseView(nRows int, nCols int) *view.ViewBuffer {
+	viewBuffer := view.NewViewBuffer(0, 0, nCols, nRows)
+	viewBuffer.Add(view.NewViewBuffer(0, 0, nCols, nRows-2).AddBorder())
+
+	editorWidth = nCols - 2
+	editorHeight = nRows - 4
+	editorTopX = 1
+	editorTopY = 1
+
+	lineNumWidth := len(strconv.Itoa(nRows - 4))
+
+	if editorWidth-lineNumWidth >= 10 { // hide line numbers on very narrow screen.
+		lineNumberView := view.NewViewBuffer(editorTopX, editorTopY, lineNumWidth, editorHeight).AddLineNumbers()
+		viewBuffer.Add(lineNumberView)
+
+		separatorView := view.NewViewBuffer(editorTopX+lineNumWidth, editorTopY, 1, editorHeight)
+		viewBuffer.Add(separatorView)
+
+		editorWidth -= lineNumWidth + 1
+		editorTopX += lineNumWidth + 1
+	}
+
+	return viewBuffer
+}
+
 func Start(fileNames []string) {
 	screen, quit := NewScreen()
 	defer quit()
@@ -51,8 +82,7 @@ func Start(fileNames []string) {
 	defer app.CloseAll()
 
 	nCols, nRows := screen.Size()
-	viewBuffer := view.NewViewBuffer(0, 0, nCols, nRows)
-	viewBuffer.Add(view.NewViewBuffer(0, 0, nCols, nRows-2).AddBorder())
+	viewBuffer := setupBaseView(nRows, nCols)
 
 	// Event loop
 	for !app.QuitSignal {
@@ -69,12 +99,12 @@ func Start(fileNames []string) {
 		}
 		viewBuffer.Add(commandView)
 
-		editorView := view.NewViewBuffer(1, 1, nCols-2, nRows-4)
+		editorView := view.NewViewBuffer(editorTopX, editorTopY, editorWidth, editorHeight)
 
 		if app.CurrentFile != nil {
 			app.CurrentFile.AdjustScroll(editorView.Height, editorView.Width)
 
-			editorView.AddText(app.CurrentFile.GetVisibleText(nRows, nCols))
+			editorView.AddText(app.CurrentFile.GetVisibleText(editorHeight, editorWidth))
 			viewBuffer.Add(editorView)
 
 			cursorX, cursorY := app.CurrentFile.GetCursor()
@@ -94,8 +124,7 @@ func Start(fileNames []string) {
 		case *tcell.EventResize:
 			screen.Sync()
 			nCols, nRows = screen.Size()
-			viewBuffer = view.NewViewBuffer(0, 0, nCols, nRows)
-			viewBuffer.Add(view.NewViewBuffer(0, 0, nCols, nRows-2).AddBorder())
+			viewBuffer = setupBaseView(nRows, nCols)
 		case *tcell.EventKey:
 			handleKeyEvent(ev, app, screen)
 		case *tcell.EventMouse:

@@ -233,7 +233,5 @@ func (app *Application) GetStatusLine() []rune {
 	)
 
 	status := strings.Join(widgets, " | ")
-	log.Debug(status)
-
 	return []rune(status)
 }

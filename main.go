@@ -18,7 +18,8 @@ func main() {
 	// Redirect log output to the file
 	log.SetOutput(logFile)
 
-	logrus.SetLevel(logrus.InfoLevel)
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetOutput(logFile)
 
 	filenames := os.Args[1:]
 

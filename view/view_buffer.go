@@ -2,6 +2,7 @@ package view
 
 import (
 	"go-editor/utils"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -84,5 +85,19 @@ func (buf *ViewBuffer) AddText(lines [][]rune) *ViewBuffer {
 	return buf
 }
 
-func (buf *ViewBuffer) AddLineNumbers() {
+func (buf *ViewBuffer) AddLineNumbers() *ViewBuffer {
+	for i := 0; i < buf.Height; i++ {
+		lineNoStr := strconv.Itoa(i + 1)
+		val := utils.RightAlign(lineNoStr, buf.Width)
+		for j := 0; j < buf.Width; j++ {
+			buf.Text[i][j] = rune(val[j])
+		}
+	}
+
+	return buf
+}
+
+func (buf *ViewBuffer) LogContents(filename string) {
+	var lines []string = utils.Map(buf.Text, func(e []rune) string { return string(e) })
+	utils.WriteFileUtil(filename, lines)
 }

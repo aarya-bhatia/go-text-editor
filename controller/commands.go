@@ -3,10 +3,11 @@ package controller
 import (
 	"errors"
 	"go-editor/model"
-	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func handleUserCommand(app *model.Application) {
@@ -52,7 +53,8 @@ func handleUserCommand(app *model.Application) {
 		if len(args) == 1 {
 			userNumber, err := strconv.Atoi(args[0]) // check if its a numeral
 			if err == nil {
-				app.GotoLine(userNumber)
+				log.Infof("Goto line: %d", userNumber)
+				app.GotoLine(userNumber - 1) // make line number zero-indexed
 			}
 		}
 	}
