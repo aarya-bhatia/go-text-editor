@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -211,6 +212,9 @@ func (app *Application) GotoLine(lineNo int) {
 }
 
 func (app *Application) GetStatusLine() []rune {
+	widgets := []string{}
+	widgets = append(widgets, fmt.Sprintf("[%s]", app.getModeName()))
+
 	filename := "No File"
 	if app.CurrentFile != nil {
 		filename = app.CurrentFile.Name
@@ -219,16 +223,19 @@ func (app *Application) GetStatusLine() []rune {
 		}
 	}
 
-	mode := app.getModeName()
+	widgets = append(widgets, filename)
 
-	status := fmt.Sprintf("[%s] | %s | Ln %d, Col %d | file %d of %d",
-		mode,
-		filename,
-		app.CurrentFile.CursorLine,
-		app.CurrentFile.GetCurrentLine().Cursor,
+	if app.CurrentFile != nil {
+		widgets = append(widgets, fmt.Sprintf("Ln %d, Col %d",
+			app.CurrentFile.CursorLine, app.CurrentFile.GetCurrentLine().Cursor))
+	}
+
+	widgets = append(widgets, fmt.Sprintf("file %d of %d",
 		app.GetCurrentFileIndex()+1,
-		len(app.Files))
+		len(app.Files)),
+	)
 
+	status := strings.Join(widgets, " | ")
 	log.Debug(status)
 
 	return []rune(status)
