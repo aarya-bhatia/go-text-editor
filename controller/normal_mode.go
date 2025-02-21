@@ -13,6 +13,26 @@ func handleKeyInNormalMode(event *tcell.EventKey, editor *model.Application) {
 			editor.CurrentFile.SetXCursor(0)
 		}
 
+	case 'a':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.GetCurrentLine().Cursor =
+				min(1+editor.CurrentFile.GetCurrentLine().Cursor,
+					editor.CurrentFile.GetCurrentLine().Size())
+			editor.Mode = model.INSERT_MODE
+		}
+
+	case 'A':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.GetCurrentLine().Cursor = editor.CurrentFile.GetCurrentLine().Size()
+			editor.Mode = model.INSERT_MODE
+		}
+
+	case 'I':
+		if editor.CurrentFile != nil {
+			editor.CurrentFile.GetCurrentLine().Cursor = 0 // TODO: should move to first non-whitespace char instead.
+			editor.Mode = model.INSERT_MODE
+		}
+
 	case '$':
 		if editor.CurrentFile != nil {
 			editor.CurrentFile.GetCurrentLine().MoveToEnd()
