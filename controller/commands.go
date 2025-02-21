@@ -12,6 +12,7 @@ import (
 
 func handleUserCommand(app *model.Application) {
 	app.UserCommand = strings.TrimSpace(app.UserCommand)
+	app.CommandHistory = append(app.CommandHistory, app.UserCommand)
 	args := strings.Split(app.UserCommand, " ")
 
 	switch args[0] {

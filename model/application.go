@@ -15,12 +15,13 @@ const COMMAND_MODE int = 2
 const NORMAL_MODE_ARG_PENDING = 3
 
 type Application struct {
-	QuitSignal  bool
-	Files       []*File
-	CurrentFile *File
-	StatusLine  string
-	Mode        int
-	UserCommand string
+	QuitSignal     bool
+	Files          []*File
+	CurrentFile    *File
+	StatusLine     string
+	Mode           int
+	UserCommand    string
+	CommandHistory []string
 }
 
 // Returns new application instance

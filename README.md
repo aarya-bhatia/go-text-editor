@@ -51,4 +51,5 @@ go run . [<filename1> [<filename2>...] ]
 - TODO feat: add visual mode
 - TODO impl popup to show longer info messages to user
 - TODO keep user command history
+    - create command struct to manage user commands and history
 - TODO improv: add colors and enhance UI
