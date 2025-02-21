@@ -34,24 +34,20 @@ go run . [<filename1> [<filename2>...] ]
 - `i`: change to insert mode
 - `:`: change to command mode
 
-## Feature List
-- DONE open and edit multiple files
-- DONE insert utf8 text
-- DONE auto-scroll when jumping cursor goes off-screen
-- DONE dynamic size for boxes
-- DONE fix ui window sizes 
-
-- TODO show line numbers
-- TODO make separate status line and command line windows
-- TODO unit tests
-- TODO insert mode - append, CTRL+keys
-- TODO insert new lines with enter
+## Tasks
+- DONE feat: open and edit multiple files
+- DONE feat: insert utf8 text
+- DONE feat: auto-scroll when jumping cursor goes off-screen
+- DONE feat: dynamic size for boxes
+- DONE feat: fix ui window sizes 
+- DONE feat: show line numbers
+- DONE core: make separate status line and command line windows
+- DONE core: open temporary file for empty buffer
+- TODO feat: insert mode - append, CTRL+keys
+- TODO core: insert new lines with enter
 - TODO object motions - words/lines
 - TODO command mode - run external commands on current line
 - TODO command mode - run external commands on entire file
-- TODO add visual mode
+- TODO feat: add visual mode
 - TODO impl popup to show longer info messages to user
-- TODO open temporary file for empty buffer
-- TODO how to show message on screen?
-- TODO move user command string into App struct
-- TODO keep user command history and show in prompt?
+- TODO keep user command history
