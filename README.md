@@ -13,7 +13,9 @@ go run . [<filename1> [<filename2>...] ]
 ```
 
 ## Insert mode
-- `<esc>`: exit mode
+- `<esc>`: exit insert mode
+- `<backspace>`: behave like usual backspace key to remove char
+- `<enter>`: behave like usual enter key to add another line
 
 ## Command mode
 - `<esc>`: exit mode without running command
@@ -27,12 +29,20 @@ go run . [<filename1> [<filename2>...] ]
 - `:ls`: print open files to log file - TODO show files in a popup
 
 ## Normal mode
-- `hjkl`: move left/down/up/right
+- `h`: move left
+- `j`: move down
+- `k`: move up
+- `l`: move right
 - `0`: jump to start of line
 - `$`: jump to end of line
 - `f<char>`: jump to next occurrence of character
 - `i`: change to insert mode
 - `:`: change to command mode
+- `I`: start insert mode at start of line
+- `a`: start insert mode after cursor (append)
+- `A`: start insert mode at end of line
+- `G`: go to end of file
+- `g`: go to start of file
 
 ## Tasks
 - DONE feat: open and edit multiple files
